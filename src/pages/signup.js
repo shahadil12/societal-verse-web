@@ -8,11 +8,15 @@ import Box from "@mui/material/Box";
 import LoginIcon from "@mui/icons-material/Login";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import useInput from "../hooks/useInput";
 import axios from "axios";
 import qs from "qs";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Router from "next/router";
+import { useDispatch } from "react-redux";
+import { authActions } from "../store/authReducer";
+import useUser from "../hooks/useUser";
 
 function Copyright(props) {
   return (
@@ -45,7 +49,10 @@ const isValidEmail =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 const isValidPassword = /^.{8,16}$/;
 
-export default function SignUpPage(props) {
+export default function SignUpPage() {
+  useUser({ redirectToIfFound: "/homepage", shouldRedirectIfFound: true });
+
+  const dispatch = useDispatch();
   const [serverError, setServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
 
@@ -99,12 +106,15 @@ export default function SignUpPage(props) {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      console.log(response);
-
       if (response.data.error) {
         setServerError(true);
         setServerErrorMessage(response.data.error);
         return;
+      }
+      if (response.data.success) {
+        dispatch(authActions.setToken(response.data.token));
+        localStorage.setItem("token", Json.stringify(response.data.token));
+        Router.push("/profile");
       }
 
       setServerError(false);

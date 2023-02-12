@@ -12,6 +12,11 @@ import axios from "axios";
 import qs from "qs";
 import { useState } from "react";
 import useInput from "../hooks/useInput";
+import useUser from "../hooks/useUser";
+import { useDispatch } from "react-redux";
+import Router from "next/router";
+import { authActions } from "../store/authReducer";
+import { userActions } from "../store/userReducer";
 
 function Copyright(props) {
   return (
@@ -45,8 +50,11 @@ const isValidEmail =
 const isValidPassword = /^.{8,16}$/;
 
 export default function loginPage() {
+  useUser({ redirectToIfFound: "/homepage", shouldRedirectIfFound: true });
+  const dispatch = useDispatch();
   const [serverError, setServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
 
   const {
     value: enteredEmail,
@@ -76,18 +84,38 @@ export default function loginPage() {
 
       if (!formIsValid) return;
 
-      const response = await axios({
+      const loginResponse = await axios({
         method: "post",
         url: "http://localhost:5000/api/auth/login",
         data: qs.stringify({ email: enteredEmail, password: enteredPassword }),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       });
 
-      if (response.data.error) {
+      if (loginResponse.data.error) {
         setServerError(true);
-        setServerErrorMessage(response.data.error);
+        setServerErrorMessage(loginResponse.data.error);
         return;
       }
+      localStorage.setItem("token", JSON.stringify(loginResponse.data.token));
+      dispatch(authActions.setToken(loginResponse.data.token));
+
+      const profileResponse = await axios({
+        method: "get",
+        url: "http://localhost:5000/api/profile",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${loginResponse.data.token}`,
+        },
+      });
+
+      if (profileResponse.data.success) {
+        setHasProfile(true);
+        dispatch(userActions.setProfile(profileResponse.data));
+      }
+
+      hasProfile ? Router.push("/homepage") : Router.push("/profile");
 
       setServerError(false);
       enteredEmailReset();

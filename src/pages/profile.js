@@ -20,9 +20,16 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import ImageUploading from "react-images-uploading";
 import dayjs from "dayjs";
 import useInput from "../hooks/useInput";
+import Alert from "@mui/material/Alert";
+import axios from "axios";
+import Router from "next/router";
+import { userActions } from "../store/userReducer";
+import { authActions } from "../store/authReducer";
+import useUser from "../hooks/useUser";
 
 function Copyright(props) {
   return (
@@ -49,16 +56,29 @@ const theme = createTheme({
     },
   },
 });
-const currentDate = Date.now();
+
 const maxNumber = 1;
 const isValidName = /^[a-zA-Z]{1,20}$/;
-const isValiduserName = /^[a-zA-Z0-9]{1,20}$/;
-const isValidBio = /^.{,500}$/;
+const isValidUserName = /^[a-zA-Z0-9]{1,20}$/;
+const isValidBio = /^.{0,500}$/;
+const isValidAge = dayjs("2010-01-01T00:00:00.000");
 
 export default function profileSetupPage() {
+  useUser({
+    redirectToIfFound: "/homepage",
+    redirectToIfNotFound: "/",
+    shouldRedirectIfNotFound: true,
+    shouldRedirectIfFound: true,
+  });
+  const token = useSelector((state) => state.auth.token);
+  const dispatch = useDispatch();
   const [image, setImage] = useState([]);
   const [gender, setGender] = useState("");
-  const [profielPicture, setProfilePicture] = useState("");
+  const [enteredProfilePicture, setEnteredProfilePicture] = useState("");
+  const [dateValue, setDateValue] = useState(dayjs(isValidAge));
+  const [genderIsValid, setGenderIsValid] = useState(false);
+  const [hasServerError, setHasServerError] = useState(false);
+  const [serverErrorMessage, setServerErrorMessage] = useState("");
 
   const {
     value: enteredFirstName,
@@ -85,30 +105,30 @@ export default function profileSetupPage() {
     valueChangeHandler: userNameChangeHandler,
     valueBlurHandler: userNameBlurHandler,
     reset: userNameReset,
-  } = useInput((value) => value.match(isValiduserName));
+  } = useInput((value) => value.match(isValidUserName));
 
   const {
     value: enteredBio,
-    valueIsValid: enteredBioIsValid,
     hasError: bioHasError,
     valueChangeHandler: bioChangeHandler,
     valueBlurHandler: bioBlurHandler,
     reset: bioReset,
   } = useInput((value) => value.match(isValidBio));
 
-  const [dateValue, setDateValue] = useState(dayjs(currentDate));
-
   const dataChangeHandler = (newDateValue) => {
     setDateValue(newDateValue);
   };
 
   const genderChangeHandler = (event) => {
+    setGenderIsValid(true);
     setGender(event.target.value);
   };
 
   const imageUploadHandler = (imageList) => {
     setImage(imageList);
-    setProfilePicture(imageList[0].data_url.split(",")[1]);
+    if (imageList.length > 0) {
+      setEnteredProfilePicture(imageList[0].data_url.split(",")[1]);
+    }
   };
 
   let formIsValid = false;
@@ -116,27 +136,71 @@ export default function profileSetupPage() {
   if (
     enteredFirstNameIsValid &&
     enteredLastNameIsValid &&
-    enteredUserNameIsValid
+    enteredUserNameIsValid &&
+    genderIsValid
   ) {
     formIsValid = true;
   }
-  const formSubbmissionHandler = (event) => {
-    event.preventDefault();
+  const formSubbmissionHandler = async (event) => {
+    try {
+      event.preventDefault();
 
-    // if (!formIsValid) return;
+      if (!formIsValid) return;
 
-    console.log(
-      enteredFirstName,
-      enteredLastName,
-      enteredBio,
-      gender,
-      profielPicture,
-      dateValue.format("YYYY/MM/DD")
-    );
+      const profileCreationResponse = await axios({
+        method: "post",
+        url: "http://localhost:5000/api/profile",
+        data: {
+          first_name: enteredFirstName,
+          last_name: enteredLastName,
+          user_name: enteredUserName,
+          bio: enteredBio,
+          gender,
+          profile_picture: enteredProfilePicture,
+          dob: dateValue.toISOString(),
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+        maxBodyLength: 6000000,
+        maxContentLength: 6000000,
+      });
 
-    firstNameReset(), lastNameReset(), userNameReset(), bioReset();
+      console.log(profileCreationResponse.data);
+      if (profileCreationResponse.data.error) {
+        setHasServerError(true);
+        setServerErrorMessage(profileCreationResponse.data.error);
+      }
+
+      const profileResponse = await axios({
+        method: "get",
+        url: "http://localhost:5000/api/profile",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (profileResponse.data.success) {
+        dispatch(userActions.setProfile(profileResponse.data));
+      }
+
+      if (profileCreationResponse.data.success) {
+        Router.push("/homepage");
+      }
+
+      firstNameReset(),
+        lastNameReset(),
+        userNameReset(),
+        bioReset(),
+        setDateValue(dayjs("2010-01-01T00:00:00.000")),
+        setGender("");
+    } catch (error) {
+      setHasServerError(true);
+      setServerErrorMessage(error.response.data.error);
+    }
   };
-
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="sm">
@@ -213,6 +277,7 @@ export default function profileSetupPage() {
                       inputFormat="MM/DD/YYYY"
                       value={dateValue}
                       onChange={dataChangeHandler}
+                      maxDate={isValidAge}
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </Stack>
@@ -267,7 +332,7 @@ export default function profileSetupPage() {
                         onClick={onImageUpload}
                         {...dragProps}
                       >
-                        Click or Drop Here
+                        {isDragging ? "Drop here please" : "Click or Drop Here"}
                       </Button>
                       {imageList.map((image, index) => (
                         <>
@@ -294,24 +359,28 @@ export default function profileSetupPage() {
                         </>
                       ))}
                       {errors && (
-                        <div>
+                        <>
                           {errors.maxNumber && (
-                            <span>
+                            <Alert variant="filled" severity="warning">
                               Number of selected images exceed maxNumber
-                            </span>
+                            </Alert>
                           )}
                           {errors.acceptType && (
-                            <span>Your selected file type is not allow</span>
+                            <Alert variant="filled" severity="warning">
+                              Your selected file type is not allow
+                            </Alert>
                           )}
                           {errors.maxFileSize && (
-                            <span>Selected file size exceed maxFileSize</span>
+                            <Alert variant="filled" severity="warning">
+                              Selected file size exceed maxFileSize
+                            </Alert>
                           )}
                           {errors.resolution && (
-                            <span>
+                            <Alert variant="filled" severity="warning">
                               Selected file is not match your desired resolution
-                            </span>
+                            </Alert>
                           )}
-                        </div>
+                        </>
                       )}
                     </>
                   )}
@@ -335,8 +404,16 @@ export default function profileSetupPage() {
                 />
               </Grid>
             </Grid>
+            <Grid item xs={12}>
+              {hasServerError && (
+                <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
+                  {serverErrorMessage}
+                </Typography>
+              )}
+            </Grid>
             <Button
               type="submit"
+              disabled={!formIsValid}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
