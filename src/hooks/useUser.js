@@ -1,27 +1,17 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import Router from "next/router";
+import { authActions } from "../store/authReducer";
 
-const useUser = ({
-  redirectToIfFound = "",
-  redirectToIfNotFound = "",
-  shouldRedirectIfNotFound = false,
-  shouldRedirectIfFound = false,
-}) => {
+const useUser = () => {
+  const dispatch = useDispatch();
   let token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
     if (!token) {
       token = JSON.parse(localStorage.getItem("token"));
+      dispatch(authActions.setToken(token));
     }
-    if (!token && shouldRedirectIfNotFound) {
-      Router.push(redirectToIfNotFound);
-    }
-
-    if (token && shouldRedirectIfFound) {
-      Router.push(redirectToIfFound);
-    }
-  }, [shouldRedirectIfFound, shouldRedirectIfNotFound]);
+  }, [token]);
 };
 
 export default useUser;

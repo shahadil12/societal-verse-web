@@ -2,7 +2,7 @@ import SendIcon from "@mui/icons-material/Send";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
-export default function MessageContain() {
+export default function MessageContainer() {
   return (
     <Container
       sx={{

@@ -1,4 +1,4 @@
-import HomeIcon from "@mui/icons-material/Home";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -6,14 +6,11 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
-import { useRouter } from "next/router";
+import Router from "next/router";
 
-export default function Home() {
-  const router = useRouter();
-
+export default function Profile() {
   const clickHandler = () => {
-    const { userName } = router.query;
-    router.push(`/${userName}j`);
+    Router.push(`/homepage/profile`);
   };
 
   return (
@@ -26,14 +23,14 @@ export default function Home() {
     >
       <Grid item xs={8}>
         <List>
-          <ListItem key="Home" disablePadding>
+          <ListItem key="Profile" disablePadding>
             <ListItemButton onClick={clickHandler}>
               <ListItemIcon>
-                <Tooltip title="Home" placement="top-end">
-                  <HomeIcon />
+                <Tooltip title="Profile" placement="top-end">
+                  <AccountCircleIcon />
                 </Tooltip>
               </ListItemIcon>
-              <ListItemText primary="Home" />
+              <ListItemText primary="Profile" />
             </ListItemButton>
           </ListItem>
         </List>

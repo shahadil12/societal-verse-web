@@ -58,7 +58,7 @@ export default function MoreMenu() {
         open={open}
         onClose={handleClose}
         TransitionComponent={Fade}
-        anchorOrigin={{ vertical: "top" }}
+        anchorOrigin={{ vertical: "top", horizontal: 0 }}
         sx={{ width: 200 }}
       >
         <MenuItem onClick={handleClose}>Profile</MenuItem>

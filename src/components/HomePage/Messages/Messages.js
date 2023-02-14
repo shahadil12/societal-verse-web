@@ -6,8 +6,7 @@ import ListSubheader from "@mui/material/ListSubheader";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
-import MessageContain from "./MessageContain";
-import { useRouter } from "next/router";
+import MessageContainer from "./MessageContainer";
 
 const messagers = [
   {
@@ -58,9 +57,6 @@ const messagers = [
 ];
 
 export default function Messages() {
-  const router = useRouter();
-  const { userName } = router.query;
-
   return (
     <Box
       sx={{
@@ -72,7 +68,7 @@ export default function Messages() {
         mt: 3,
       }}
     >
-      <MessageContain />
+      <MessageContainer />
       <List
         sx={{
           width: "350px",
@@ -84,9 +80,9 @@ export default function Messages() {
       >
         <li>
           <ui>
-            <ListSubheader sx={{ display: "flex", justifyContent: "center" }}>
-              {userName.toUpperCase()}
-            </ListSubheader>
+            <ListSubheader
+              sx={{ display: "flex", justifyContent: "center" }}
+            ></ListSubheader>
             <Divider />
             {messagers.map((messenger, i) => {
               return (

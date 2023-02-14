@@ -1,5 +1,5 @@
+import CreateIcon from "@mui/icons-material/Create";
 import * as React from "react";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -7,19 +7,17 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
+import PropTypes from "prop-types";
+import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
-import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import InputAdornment from "@mui/material/InputAdornment";
-import FormControl from "@mui/material/FormControl";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import SearchIcon from "@mui/icons-material/Search";
+import CollectionsIcon from "@mui/icons-material/Collections";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -59,16 +57,16 @@ BootstrapDialogTitle.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-export default function Notification() {
+export default function Create() {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
+
   return (
     <>
       <Grid
@@ -80,14 +78,14 @@ export default function Notification() {
       >
         <Grid item xs={8}>
           <List>
-            <ListItem key="Notification" disablePadding>
+            <ListItem key="Create" disablePadding>
               <ListItemButton onClick={handleClickOpen}>
                 <ListItemIcon>
-                  <Tooltip title="Notifications" placement="top-end">
-                    <NotificationsNoneIcon />
+                  <Tooltip title="Create" placement="top-end">
+                    <CreateIcon />
                   </Tooltip>
                 </ListItemIcon>
-                <ListItemText primary="Notification" />
+                <ListItemText primary="Create" />
               </ListItemButton>
             </ListItem>
           </List>
@@ -97,20 +95,33 @@ export default function Notification() {
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
-        PaperProps={{ sx: { height: "1800px", width: "450px" } }}
-        sx={{
-          verticalAlign: "middle",
-          display: "inline-flex",
-          position: "absolute",
-          left: -159,
-          top: -30,
-        }}
+        sx={{ verticalAlign: "middle", display: "inline-flex", left: 100 }}
       >
         <BootstrapDialogTitle onClose={handleClose}>
-          Notifications
+          Create new Post
         </BootstrapDialogTitle>
         <DialogContent dividers>
-          <Typography variant="h7">Today</Typography>
+          <CollectionsIcon
+            sx={{
+              fontSize: 80,
+              ml: 16,
+              mb: 1,
+            }}
+          />
+          <Typography variant="h5" sx={{ ml: 10 }}>
+            Drag photos here
+          </Typography>
+          <DialogActions>
+            <Button
+              autoFocus
+              onClick={handleClose}
+              color="primary"
+              variant="contained"
+              sx={{ mr: 5, ml: 5 }}
+            >
+              Select from computer
+            </Button>
+          </DialogActions>
         </DialogContent>
       </BootstrapDialog>
     </>

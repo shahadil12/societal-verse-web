@@ -8,7 +8,6 @@ import Box from "@mui/material/Box";
 import LoginIcon from "@mui/icons-material/Login";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import useInput from "../hooks/useInput";
 import axios from "axios";
@@ -17,43 +16,19 @@ import Router from "next/router";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authReducer";
 import useUser from "../hooks/useUser";
-
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="#060606" href="/">
-        Societal Verse
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#060606",
-    },
-  },
-});
+import Copyright from "../components/ui/Copyright";
 
 const isValidName = /^[a-zA-Z ]{1,20}$/;
+
 const isValidEmail =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
 const isValidPassword = /^.{8,16}$/;
 
 export default function SignUpPage() {
-  useUser({ redirectToIfFound: "/homepage", shouldRedirectIfFound: true });
-
+  useUser();
   const dispatch = useDispatch();
-  const [serverError, setServerError] = useState(false);
+  const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
 
   const {
@@ -107,7 +82,7 @@ export default function SignUpPage() {
       });
 
       if (response.data.error) {
-        setServerError(true);
+        setHasServerError(true);
         setServerErrorMessage(response.data.error);
         return;
       }
@@ -117,126 +92,127 @@ export default function SignUpPage() {
         Router.push("/profile");
       }
 
-      setServerError(false);
+      setHasServerError(false);
       enteredNameReset();
       enteredEmailReset();
       enteredPasswordReset();
     } catch (error) {
-      console.log(error);
+      setHasServerError(true);
+      if (error?.response?.data?.error) {
+        setServerErrorMessage(error.response.data.error);
+      }
     }
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <LoginIcon
-            fontSize="large"
-            className="Icon"
-            sx={{ color: "white", bgcolor: "#060606", m: 1 }}
-          />
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <LoginIcon
+          fontSize="large"
+          className="Icon"
+          sx={{ color: "white", bgcolor: "#060606", m: 1 }}
+        />
 
-          <Typography component="h1" variant="h5" color="#060606">
-            Sign up
-          </Typography>
-          <Box
-            component="form"
-            noValidate
-            onSubmit={formSubbmissionHandler}
-            sx={{ mt: 3 }}
+        <Typography component="h1" variant="h5" color="#060606">
+          Sign up
+        </Typography>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={formSubbmissionHandler}
+          sx={{ mt: 3 }}
+        >
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                autoFocus
+                required
+                fullWidth
+                autoComplete="given-name"
+                name="fullname"
+                label="Full Name"
+                value={enteredName}
+                onChange={nameChangeHandler}
+                onBlur={nameBlurHandler}
+                error={enteredNameHasError}
+                helperText={
+                  enteredNameHasError
+                    ? "Full name should be less than 20 characters"
+                    : ""
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                value={enteredEmail}
+                onChange={emailChangeHandler}
+                onBlur={emailBlurHandler}
+                error={enteredEmailHasError}
+                helperText={
+                  enteredEmailHasError ? "Please enter valid email" : ""
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                value={enteredPassword}
+                onChange={passwordChangeHandler}
+                onBlur={passwordBlurHandler}
+                error={enteredPasswordHasError}
+                helperText={
+                  enteredPasswordHasError
+                    ? "Password must be between 8 to 16 characters"
+                    : ""
+                }
+              />
+            </Grid>
+            {hasServerError && (
+              <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
+                {serverErrorMessage}
+              </Typography>
+            )}
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            color="primary"
+            variant="contained"
+            disabled={!formIsValid}
+            sx={{ mt: 3, mb: 2 }}
           >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  autoFocus
-                  required
-                  fullWidth
-                  autoComplete="given-name"
-                  name="fullname"
-                  label="Full Name"
-                  value={enteredName}
-                  onChange={nameChangeHandler}
-                  onBlur={nameBlurHandler}
-                  error={enteredNameHasError}
-                  helperText={
-                    enteredNameHasError
-                      ? "Full name should be less than 20 characters"
-                      : ""
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  value={enteredEmail}
-                  onChange={emailChangeHandler}
-                  onBlur={emailBlurHandler}
-                  error={enteredEmailHasError}
-                  helperText={
-                    enteredEmailHasError ? "Please enter valid email" : ""
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  value={enteredPassword}
-                  onChange={passwordChangeHandler}
-                  onBlur={passwordBlurHandler}
-                  error={enteredPasswordHasError}
-                  helperText={
-                    enteredPasswordHasError
-                      ? "Password must be between 8 to 16 characters"
-                      : ""
-                  }
-                />
-              </Grid>
-              {serverError && (
-                <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
-                  {serverErrorMessage}
-                </Typography>
-              )}
+            Sign Up
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link href="/" variant="body2">
+                Already have an account? Log in
+              </Link>
             </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              color="primary"
-              variant="contained"
-              disabled={!formIsValid}
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign Up
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/" variant="body2">
-                  Already have an account? Log in
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
+          </Grid>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
-      </Container>
-    </ThemeProvider>
+      </Box>
+      <Copyright sx={{ mt: 5 }} />
+    </Container>
   );
 }

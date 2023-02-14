@@ -7,7 +7,6 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 import qs from "qs";
 import { useState } from "react";
@@ -17,32 +16,8 @@ import { useDispatch } from "react-redux";
 import Router from "next/router";
 import { authActions } from "../store/authReducer";
 import { userActions } from "../store/userReducer";
-
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="#060606" href="#">
-        Societal Verse
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#060606",
-    },
-  },
-});
+import Copyright from "../components/ui/Copyright";
+import Field from "../components/ui/Inputs/Field";
 
 const isValidEmail =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -50,11 +25,13 @@ const isValidEmail =
 const isValidPassword = /^.{8,16}$/;
 
 export default function loginPage() {
-  useUser({ redirectToIfFound: "/homepage", shouldRedirectIfFound: true });
+  useUser();
   const dispatch = useDispatch();
-  const [serverError, setServerError] = useState(false);
+  const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  // const [enteredEmailIsValid, setEnteredEmailisValid] = useState(false);
+  // const [enteredEmail, setEnteredEmail] = useState("");
 
   const {
     value: enteredEmail,
@@ -76,6 +53,10 @@ export default function loginPage() {
 
   let formIsValid = false;
 
+  // const emailIsValid = (valueIsValid) => setEnteredEmailisValid(valueIsValid);
+  // const emailValue = (value) => setEnteredEmail(value);
+  // const emailReset = (emailReset) => emailReset;
+
   if (enteredEmailIsValid && enteredPasswordIsValid) formIsValid = true;
 
   const formSubmissionHandler = async (event) => {
@@ -94,7 +75,7 @@ export default function loginPage() {
       });
 
       if (loginResponse.data.error) {
-        setServerError(true);
+        setHasServerError(true);
         setServerErrorMessage(loginResponse.data.error);
         return;
       }
@@ -117,122 +98,131 @@ export default function loginPage() {
 
       hasProfile ? Router.push("/homepage") : Router.push("/profile");
 
-      setServerError(false);
+      setHasServerError(false);
       enteredEmailReset();
       enteredPasswordReset();
     } catch (error) {
-      console.log(error);
+      setHasServerError(true);
+      if (error?.response?.data?.error) {
+        setServerErrorMessage(error.response.data.error);
+      }
     }
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Grid container component="main" sx={{ height: "100vh" }}>
-        <CssBaseline />
-        <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
+    <Grid container component="main" sx={{ height: "100vh" }}>
+      <CssBaseline />
+      <Grid
+        item
+        xs={false}
+        sm={4}
+        md={7}
+        sx={{
+          backgroundImage: `url("../../Picsart_22-11-14_16-17-25-225.png" )`,
+          backgroundRepeat: "no-repeat",
+          backgroundColor: "black",
+          backgroundSize: "460px 350px",
+          backgroundPosition: "center",
+        }}
+      />
+      <Grid
+        item
+        xs={12}
+        sm={8}
+        md={5}
+        component={Paper}
+        elevation={6}
+        sx={{ bgcolor: "#cebb76" }}
+        square
+      >
+        <Box
           sx={{
-            backgroundImage: `url("../../Picsart_22-11-14_16-17-25-225.png" )`,
-            backgroundRepeat: "no-repeat",
-            backgroundColor: "black",
-            backgroundSize: "460px 350px",
-            backgroundPosition: "center",
+            my: 8,
+            mx: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
-        />
-        <Grid
-          item
-          xs={12}
-          sm={8}
-          md={5}
-          component={Paper}
-          elevation={6}
-          sx={{ bgcolor: "#cebb76" }}
-          square
         >
+          <LockOutlinedIcon
+            className="Icon"
+            sx={{ color: "white", bgcolor: "#060606", m: 1 }}
+          />
+          <Typography component="h1" variant="h5">
+            Log in
+          </Typography>
           <Box
-            sx={{
-              my: 8,
-              mx: 4,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
+            component="form"
+            noValidate
+            onSubmit={formSubmissionHandler}
+            sx={{ mt: 1 }}
           >
-            <LockOutlinedIcon
-              className="Icon"
-              sx={{ color: "white", bgcolor: "#060606", m: 1 }}
+            {/* <Field
+                type={"email"}
+                value={emailValue}
+                invalidMessage={"Please Enter Valid Email"}
+                validateValue={(value) => value.match(isValidEmail)}
+                isValid={emailIsValid}
+                reset={emailReset}
+              /> */}
+            <TextField
+              autoFocus
+              required
+              fullWidth
+              autoComplete="email"
+              margin="normal"
+              label="Email"
+              name="email"
+              onChange={emailChangeHandler}
+              onBlur={emailBlurHandler}
+              value={enteredEmail}
+              error={enteredEmailHasError}
+              helperText={enteredEmailHasError ? "Invalid Email" : ""}
             />
-            <Typography component="h1" variant="h5">
-              Log in
-            </Typography>
-            <Box
-              component="form"
-              noValidate
-              onSubmit={formSubmissionHandler}
-              sx={{ mt: 1 }}
+            <TextField
+              required
+              fullWidth
+              margin="normal"
+              name="password"
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              onChange={passwordChangeHandler}
+              onBlur={passwordBlurHandler}
+              value={enteredPassword}
+              error={enteredPasswordHasError}
+              helperText={
+                enteredPasswordHasError
+                  ? "Password must be between 8 to 16 characters"
+                  : ""
+              }
+            />
+            {hasServerError && (
+              <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
+                {serverErrorMessage}
+              </Typography>
+            )}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              disabled={!formIsValid}
+              sx={{ mt: 3, mb: 2, color: "white" }}
             >
-              <TextField
-                autoFocus
-                required
-                fullWidth
-                autoComplete="email"
-                margin="normal"
-                label="Email"
-                name="email"
-                onChange={emailChangeHandler}
-                onBlur={emailBlurHandler}
-                value={enteredEmail}
-                error={enteredEmailHasError}
-                helperText={enteredEmailHasError ? "Invalid Email" : ""}
-              />
-              <TextField
-                required
-                fullWidth
-                margin="normal"
-                name="password"
-                label="Password"
-                type="password"
-                autoComplete="current-password"
-                onChange={passwordChangeHandler}
-                onBlur={passwordBlurHandler}
-                value={enteredPassword}
-                error={enteredPasswordHasError}
-                helperText={
-                  enteredEmailHasError
-                    ? "Password must be between 8 to 16 characters"
-                    : ""
-                }
-              />
-              {serverError && (
-                <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
-                  {serverErrorMessage}
-                </Typography>
-              )}
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                disabled={!formIsValid}
-                sx={{ mt: 3, mb: 2, color: "white" }}
-              >
-                Sign In
-              </Button>
-              <Grid container>
-                <Grid item>
-                  <Link href="/signup" variant="body2">
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
+              Sign In
+            </Button>
+            <Grid container>
+              <Grid item>
+                <Link href="/signup" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
               </Grid>
-              <Copyright sx={{ mt: 5 }} />
-            </Box>
+            </Grid>
+            <Copyright sx={{ mt: 5 }} />
           </Box>
-        </Grid>
+        </Box>
       </Grid>
-    </ThemeProvider>
+    </Grid>
   );
 }
