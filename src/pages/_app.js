@@ -1,21 +1,35 @@
 import "../styles/globals.css";
 import Head from "next/head";
-import { Provider } from "react-redux";
-import store from "../store/index";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "../utils/theme";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { themeSettings } from "../utils/theme";
+import { useSelector, useStore } from "react-redux";
+import { useMemo } from "react";
+import { wrapper } from "../store/index";
+import { PersistGate } from "redux-persist/integration/react";
+import { ProSidebarProvider } from "react-pro-sidebar";
+import { CssBaseline } from "@mui/material";
 
 function MyApp({ Component, pageProps }) {
+  const mode = useSelector((state) => state.auth.mode);
+  const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
+  const store = useStore((state) => state);
+
   return (
-    <Provider store={store}>
+    <PersistGate loading={null} persistor={store.__persister}>
       <ThemeProvider theme={theme}>
-        <Head>
-          <meta name="viewport" content="initial-scale=1, width=device-width" />
-        </Head>
-        <Component {...pageProps} />
+        <CssBaseline />
+        <ProSidebarProvider>
+          <Head>
+            <meta
+              name="viewport"
+              content="initial-scale=1, width=device-width"
+            />
+          </Head>
+          <Component {...pageProps} />
+        </ProSidebarProvider>
       </ThemeProvider>
-    </Provider>
+    </PersistGate>
   );
 }
 
-export default MyApp;
+export default wrapper.withRedux(MyApp);

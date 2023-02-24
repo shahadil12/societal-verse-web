@@ -1,55 +1,40 @@
-html,
-body {
-  padding: 0;
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap");
+
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  background: #cebb76;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+  text-decoration: none;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: #060606;
-  }
-}
-/*sideBar */
-
-.MuiGrid-direction-xs-column {
-  margin-top: -65px;
+*::-webkit-scrollbar {
+  display: none;
 }
 
-/*homePage */
-.storyContainer {
-  border: 1px solid gray;
-  padding-top: 15px;
-  padding-bottom: 15px;
-  padding-left: 15px;
-  width: 485px;
-  margin-left: 175px;
-  margin-top: 30px;
-}
-.MuiPaper-rounded {
-  max-width: 500px;
-  border: 1px solid gray;
-  margin-left: 150px;
-  margin-top: 25px;
+html {
+  scroll-behavior: smooth;
 }
 
-.MuiPaper-root {
-  background-color: #cebb76;
-}
-.MuiBox-root {
-  background-color: #cebb76;
-}
-
-.profile {
-  border-radius: 50%;
+body {
+  margin: 0;
+  font-family: "QuickSand", sans-serif;
+  height: "100vh";
 }
 
+html,
+body,
+#root,
+.app {
+  height: 100%;
+  width: 100%;
+}
+
+.menuItem {
+  margin-bottom: 15px;
+}
 .Icon {
   border-radius: 50%;
   border: 1px solid black;
@@ -64,17 +49,14 @@ body {
   width: 50px;
 }
 
-.storyAvatar {
-  border-radius: 50%;
-  border: 1px solid black;
-  height: 60px;
-  width: 60px;
-}
-
 .messageContainer {
   width: 550px;
   display: flex;
   justify-content: center;
   right: 700px;
   margin: 0;
+}
+
+.css-dip3t8 {
+  background-color: #000000;
 }

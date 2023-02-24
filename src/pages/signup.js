@@ -5,18 +5,19 @@ import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
 import LoginIcon from "@mui/icons-material/Login";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useState } from "react";
 import useInput from "../hooks/useInput";
-import axios from "axios";
-import qs from "qs";
-import Router from "next/router";
+import { useRouter } from "next/router";
+import client from "../utils/api";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authReducer";
 import useUser from "../hooks/useUser";
 import Copyright from "../components/ui/Copyright";
+import { Avatar } from "@mui/material";
 
 const isValidName = /^[a-zA-Z ]{1,20}$/;
 
@@ -26,7 +27,8 @@ const isValidEmail =
 const isValidPassword = /^.{8,16}$/;
 
 export default function SignUpPage() {
-  useUser();
+  useUser({ redirectTo: "/homepage", redirectIfFound: true });
+  const Router = useRouter();
   const dispatch = useDispatch();
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
@@ -70,16 +72,17 @@ export default function SignUpPage() {
 
       if (!formIsValid) return;
 
-      const response = await axios({
-        method: "post",
-        url: "http://localhost:5000/api/auth/register",
-        data: qs.stringify({
+      const response = await client.post(
+        "/auth/register",
+        {
           full_name: enteredName,
           email: enteredEmail,
           password: enteredPassword,
-        }),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      });
+        },
+        {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }
+      );
 
       if (response.data.error) {
         setHasServerError(true);
@@ -88,7 +91,6 @@ export default function SignUpPage() {
       }
       if (response.data.success) {
         dispatch(authActions.setToken(response.data.token));
-        localStorage.setItem("token", Json.stringify(response.data.token));
         Router.push("/profile");
       }
 
@@ -98,6 +100,9 @@ export default function SignUpPage() {
       enteredPasswordReset();
     } catch (error) {
       setHasServerError(true);
+      if (!error.response) {
+        setServerErrorMessage("Can't connect to server");
+      }
       if (error?.response?.data?.error) {
         setServerErrorMessage(error.response.data.error);
       }
@@ -115,14 +120,11 @@ export default function SignUpPage() {
           alignItems: "center",
         }}
       >
-        <LoginIcon
-          fontSize="large"
-          className="Icon"
-          sx={{ color: "white", bgcolor: "#060606", m: 1 }}
-        />
-
-        <Typography component="h1" variant="h5" color="#060606">
-          Sign up
+        <Avatar>
+          <LoginIcon fontSize="large" />
+        </Avatar>
+        <Typography variant="h4" sx={{ mt: 1 }}>
+          <h4> Sign up</h4>
         </Typography>
         <Box
           component="form"
@@ -138,15 +140,17 @@ export default function SignUpPage() {
                 fullWidth
                 autoComplete="given-name"
                 name="fullname"
-                label="Full Name"
+                label={<h4 style={{ display: "inline" }}>Full Name</h4>}
                 value={enteredName}
                 onChange={nameChangeHandler}
                 onBlur={nameBlurHandler}
                 error={enteredNameHasError}
                 helperText={
-                  enteredNameHasError
-                    ? "Full name should be less than 20 characters"
-                    : ""
+                  enteredNameHasError ? (
+                    <h4>Full name should be less than 20 characters</h4>
+                  ) : (
+                    ""
+                  )
                 }
               />
             </Grid>
@@ -187,11 +191,13 @@ export default function SignUpPage() {
                 }
               />
             </Grid>
-            {hasServerError && (
-              <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
-                {serverErrorMessage}
-              </Typography>
-            )}
+            <Grid item xs={12}>
+              {hasServerError && (
+                <Alert variant="filled" severity="warning">
+                  {serverErrorMessage}
+                </Alert>
+              )}
+            </Grid>
           </Grid>
           <Button
             type="submit"
@@ -206,7 +212,7 @@ export default function SignUpPage() {
           <Grid container justifyContent="flex-end">
             <Grid item>
               <Link href="/" variant="body2">
-                Already have an account? Log in
+                <h4>Already have an account? Log in</h4>
               </Link>
             </Grid>
           </Grid>

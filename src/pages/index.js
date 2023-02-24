@@ -2,22 +2,21 @@ import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import Container from "@mui/material/Container";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-import axios from "axios";
-import qs from "qs";
-import { useState } from "react";
+import client from "../utils/api";
+import { useEffect, useState } from "react";
 import useInput from "../hooks/useInput";
 import useUser from "../hooks/useUser";
-import { useDispatch } from "react-redux";
-import Router from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/router";
 import { authActions } from "../store/authReducer";
 import { userActions } from "../store/userReducer";
 import Copyright from "../components/ui/Copyright";
-import Field from "../components/ui/Inputs/Field";
+import { Avatar, Alert } from "@mui/material";
 
 const isValidEmail =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -25,13 +24,13 @@ const isValidEmail =
 const isValidPassword = /^.{8,16}$/;
 
 export default function loginPage() {
-  useUser();
+  useUser({ redirectTo: "/homepage", redirectIfFound: true });
+  const Router = useRouter();
   const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.token);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
-  // const [enteredEmailIsValid, setEnteredEmailisValid] = useState(false);
-  // const [enteredEmail, setEnteredEmail] = useState("");
 
   const {
     value: enteredEmail,
@@ -53,10 +52,6 @@ export default function loginPage() {
 
   let formIsValid = false;
 
-  // const emailIsValid = (valueIsValid) => setEnteredEmailisValid(valueIsValid);
-  // const emailValue = (value) => setEnteredEmail(value);
-  // const emailReset = (emailReset) => emailReset;
-
   if (enteredEmailIsValid && enteredPasswordIsValid) formIsValid = true;
 
   const formSubmissionHandler = async (event) => {
@@ -65,44 +60,48 @@ export default function loginPage() {
 
       if (!formIsValid) return;
 
-      const loginResponse = await axios({
-        method: "post",
-        url: "http://localhost:5000/api/auth/login",
-        data: qs.stringify({ email: enteredEmail, password: enteredPassword }),
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+      const loginResponse = await client.post(
+        "/auth/login",
+        {
+          email: enteredEmail,
+          password: enteredPassword,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
       if (loginResponse.data.error) {
         setHasServerError(true);
         setServerErrorMessage(loginResponse.data.error);
         return;
       }
-      localStorage.setItem("token", JSON.stringify(loginResponse.data.token));
-      dispatch(authActions.setToken(loginResponse.data.token));
-
-      const profileResponse = await axios({
-        method: "get",
-        url: "http://localhost:5000/api/profile",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${loginResponse.data.token}`,
-        },
-      });
-
-      if (profileResponse.data.success) {
-        setHasProfile(true);
-        dispatch(userActions.setProfile(profileResponse.data));
+      if (loginResponse.data.success) {
+        dispatch(authActions.setToken(loginResponse.data.token));
+        const profileResponse = await client.get("/profile", {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${loginResponse.data.token}`,
+          },
+        });
+        console.log(profileResponse);
+        if (profileResponse.data.success) {
+          setHasProfile(true);
+          dispatch(userActions.setProfile(profileResponse.data));
+        }
+        hasProfile ? Router.push("/homepage") : Router.push("/profile");
       }
 
-      hasProfile ? Router.push("/homepage") : Router.push("/profile");
-
-      setHasServerError(false);
+      // setHasServerError(false);
       enteredEmailReset();
       enteredPasswordReset();
     } catch (error) {
       setHasServerError(true);
+      if (!error.response) {
+        setServerErrorMessage("Can't connect to server");
+      }
       if (error?.response?.data?.error) {
         setServerErrorMessage(error.response.data.error);
       }
@@ -110,119 +109,93 @@ export default function loginPage() {
   };
 
   return (
-    <Grid container component="main" sx={{ height: "100vh" }}>
+    <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={7}
+      <Box
         sx={{
-          backgroundImage: `url("../../Picsart_22-11-14_16-17-25-225.png" )`,
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "black",
-          backgroundSize: "460px 350px",
-          backgroundPosition: "center",
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
-      />
-      <Grid
-        item
-        xs={12}
-        sm={8}
-        md={5}
-        component={Paper}
-        elevation={6}
-        sx={{ bgcolor: "#cebb76" }}
-        square
       >
+        <Avatar>
+          <LockOutlinedIcon fontSize="large" />
+        </Avatar>
+        <Typography variant="h4" sx={{ mt: 1 }}>
+          <h4>Log in</h4>
+        </Typography>
         <Box
-          sx={{
-            my: 8,
-            mx: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
+          component="form"
+          noValidate
+          onSubmit={formSubmissionHandler}
+          sx={{ mt: 3 }}
         >
-          <LockOutlinedIcon
-            className="Icon"
-            sx={{ color: "white", bgcolor: "#060606", m: 1 }}
-          />
-          <Typography component="h1" variant="h5">
-            Log in
-          </Typography>
-          <Box
-            component="form"
-            noValidate
-            onSubmit={formSubmissionHandler}
-            sx={{ mt: 1 }}
-          >
-            {/* <Field
-                type={"email"}
-                value={emailValue}
-                invalidMessage={"Please Enter Valid Email"}
-                validateValue={(value) => value.match(isValidEmail)}
-                isValid={emailIsValid}
-                reset={emailReset}
-              /> */}
-            <TextField
-              autoFocus
-              required
-              fullWidth
-              autoComplete="email"
-              margin="normal"
-              label="Email"
-              name="email"
-              onChange={emailChangeHandler}
-              onBlur={emailBlurHandler}
-              value={enteredEmail}
-              error={enteredEmailHasError}
-              helperText={enteredEmailHasError ? "Invalid Email" : ""}
-            />
-            <TextField
-              required
-              fullWidth
-              margin="normal"
-              name="password"
-              label="Password"
-              type="password"
-              autoComplete="current-password"
-              onChange={passwordChangeHandler}
-              onBlur={passwordBlurHandler}
-              value={enteredPassword}
-              error={enteredPasswordHasError}
-              helperText={
-                enteredPasswordHasError
-                  ? "Password must be between 8 to 16 characters"
-                  : ""
-              }
-            />
-            {hasServerError && (
-              <Typography variant="subtitle1" style={{ color: "#b40e0e" }}>
-                {serverErrorMessage}
-              </Typography>
-            )}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              disabled={!formIsValid}
-              sx={{ mt: 3, mb: 2, color: "white" }}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item>
-                <Link href="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                autoFocus
+                required
+                fullWidth
+                autoComplete="email"
+                margin="normal"
+                label="Email"
+                name="email"
+                onChange={emailChangeHandler}
+                onBlur={emailBlurHandler}
+                value={enteredEmail}
+                error={enteredEmailHasError}
+                helperText={enteredEmailHasError ? "Invalid Email" : ""}
+              />
             </Grid>
-            <Copyright sx={{ mt: 5 }} />
-          </Box>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                margin="normal"
+                name="password"
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                onChange={passwordChangeHandler}
+                onBlur={passwordBlurHandler}
+                value={enteredPassword}
+                error={enteredPasswordHasError}
+                helperText={
+                  enteredPasswordHasError
+                    ? "Password must be between 8 to 16 characters"
+                    : ""
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              {hasServerError && (
+                <Alert variant="filled" severity="warning">
+                  <h3>{serverErrorMessage}</h3>
+                </Alert>
+              )}
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            color="primary"
+            variant="contained"
+            disabled={!formIsValid}
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Sign Up
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link href="/" variant="body2">
+                <h3>Don't hava an account? Sign up</h3>
+              </Link>
+            </Grid>
+          </Grid>
         </Box>
-      </Grid>
-    </Grid>
+      </Box>
+      <Copyright sx={{ mt: 5 }} />
+    </Container>
   );
 }

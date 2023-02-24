@@ -12,8 +12,7 @@ import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import useInput from "../hooks/useInput";
 import Alert from "@mui/material/Alert";
-import axios from "axios";
-import Router from "next/router";
+import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { userActions } from "../store/userReducer";
 import useUser from "../hooks/useUser";
@@ -21,13 +20,15 @@ import Calender from "../components/ui/Inputs/Calender";
 import Copyright from "../components/ui/Copyright";
 import SelectGender from "../components/ui/Inputs/SelectGender";
 import ImageUploader from "../components/ui/Inputs/ImageUploader";
+import client from "../utils/api";
 
 const isValidName = /^[a-zA-Z]{1,20}$/;
 const isValidUserName = /^[a-zA-Z0-9]{1,20}$/;
 const isValidBio = /^.{0,500}$/;
 
 export default function profileSetupPage() {
-  useUser();
+  useUser({ redirectTo: "/homepage", redirectIfFound: true });
+  const Router = useRouter();
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
   const [enteredGender, setEnteredGender] = useState("");
@@ -80,16 +81,6 @@ export default function profileSetupPage() {
     reset: bioReset,
   } = useInput((value) => value.match(isValidBio));
 
-  console.log(
-    enteredFirstName,
-    enteredLastName,
-    enteredUserName,
-    enteredBio,
-    enteredGender,
-    enteredDate.toISOString(),
-    enteredProfilePicture
-  );
-
   let formIsValid = false;
 
   if (
@@ -107,10 +98,9 @@ export default function profileSetupPage() {
 
       if (!formIsValid) return;
 
-      const profileCreationResponse = await axios({
-        method: "post",
-        url: "http://localhost:5000/api/profile",
-        data: {
+      const profileCreationResponse = await client.post(
+        "/profile",
+        {
           first_name: enteredFirstName,
           last_name: enteredLastName,
           user_name: enteredUserName,
@@ -119,38 +109,25 @@ export default function profileSetupPage() {
           profile_picture: enteredProfilePicture,
           dob: enteredDate.toISOString(),
         },
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-        maxBodyLength: 6000000,
-        maxContentLength: 6000000,
-      });
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${token}`,
+          },
+          maxBodyLength: 6000000,
+          maxContentLength: 6000000,
+        }
+      );
 
+      console.log(profileCreationResponse);
       if (profileCreationResponse.data.error) {
         setHasServerError(true);
         setServerErrorMessage(profileCreationResponse.data.error);
       }
 
       if (profileCreationResponse.data.success) {
-        const profileResponse = await axios({
-          method: "get",
-          url: "http://localhost:5000/api/profile",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (profileResponse.data.error) {
-          setHasServerError(true);
-          setServerErrorMessage(profileResponse.data.error);
-        }
-
-        if (profileResponse.data.success) {
-          dispatch(userActions.setProfile(profileResponse.data));
-          Router.push("/homepage");
-        }
+        dispatch(userActions.setProfile(profileResponse.data));
+        Router.push("/homepage");
       }
 
       firstNameReset();

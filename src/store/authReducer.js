@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialAuthState = { token: "" };
+const initialAuthState = { token: "", mode: "light" };
 
 const authSlice = createSlice({
   name: "auth",
@@ -8,6 +8,9 @@ const authSlice = createSlice({
   reducers: {
     setToken(state, action) {
       state.token = action.payload;
+    },
+    setMode(state) {
+      state.mode = state.mode === "light" ? "dark" : "light";
     },
   },
 });
