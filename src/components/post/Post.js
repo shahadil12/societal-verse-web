@@ -95,10 +95,8 @@ export default function Post(props) {
     }
   };
 
-  const likeHandler = async (event) => {
+  const likeHandler = async (postId) => {
     try {
-      event.preventDefault();
-      const postId = event.target.postId.value;
       if (!liked) {
         const response = await client.post(
           `/post/like/${postId}`,
@@ -126,6 +124,12 @@ export default function Post(props) {
     }
   };
 
+  const profileShowHandler = (event) => {
+    event.preventDefault();
+    const userId = event.target.userId.value;
+    router.push(`/homepage/profile/${userId}`);
+  };
+
   // const currentTime = new Date().toLocaleTimeString();
   // const postUploadTime = new Date(updatedAt).toLocaleTimeString();
 
@@ -142,9 +146,22 @@ export default function Post(props) {
             <Card sx={{ maxWidth: 500, ml: 14, mr: 8, mt: 7 }}>
               <CardHeader
                 avatar={
-                  <Avatar
-                    src={`data:image/jpeg;base64,${post?.userDetail?.thumbnail_profile_picture}`}
-                  />
+                  <Box
+                    component="form"
+                    noValidate
+                    onSubmit={profileShowHandler}
+                  >
+                    <IconButton type="submit">
+                      <Avatar
+                        src={`data:image/jpeg;base64,${post?.userDetail?.thumbnail_profile_picture}`}
+                      />
+                    </IconButton>
+                    <input
+                      name="userId"
+                      value={post?.post?.user_id}
+                      type="hidden"
+                    />
+                  </Box>
                 }
                 subheader={<h3>{post?.userDetail?.user_name}</h3>}
                 action={
@@ -160,11 +177,18 @@ export default function Post(props) {
                 image={`data:image/jpeg;base64,${post?.post?.picture}`}
               />
               <CardActions disableSpacing>
-                <Box component="form" noValidate onSubmit={likeHandler}>
+                <Box
+                  component="form"
+                  noValidate
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    likeHandler(post?.post?.id);
+                  }}
+                >
                   <IconButton type="submit">
                     {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                   </IconButton>
-                  <input name="postId" value={post?.post?.id} type="hidden" />
+                  {/* <input name="postId" value={post?.post?.id} type="hidden" /> */}
                 </Box>
                 <Typography variant="h5">
                   <h5>{post?.likes} likes</h5>
@@ -206,6 +230,8 @@ export default function Post(props) {
                           ? "Comment should be less than 500 characters"
                           : ""
                       }
+                      onChange={commentChangeHandler}
+                      onBlur={commentBlurHandler}
                       startAdornment={
                         <InputAdornment position="start">
                           <TagFacesIcon />

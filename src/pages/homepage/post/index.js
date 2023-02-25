@@ -1,4 +1,4 @@
-import SideBar from "../../components/ui/SideBar/SideBar";
+import SideBar from "../../../components/ui/SideBar";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
@@ -16,9 +16,9 @@ import {
 import ImageUploading from "react-images-uploading";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Alert from "@mui/material/Alert";
-import useUser from "../../hooks/useUser";
-import useInput from "../../hooks/useInput";
-import client from "../../utils/api";
+import useUser from "../../../hooks/useUser";
+import useInput from "../../../hooks/useInput";
+import client from "../../../utils/api";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -38,10 +38,10 @@ const style = {
 const maxNumber = 1;
 const isValidCaption = /^.{1,500}$/;
 
-const ImageUploader = (props) => {
-  useUser({ redirectTo: "/" });
+const CreatePost = (props) => {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
+  const profile = useSelector((state) => state.user.profile);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");
   const [image, setImage] = useState([]);
@@ -212,8 +212,12 @@ const ImageUploader = (props) => {
                       }}
                     >
                       <CardHeader
-                        avatar={<Avatar>R</Avatar>}
-                        title="Shah Adil"
+                        avatar={
+                          <Avatar
+                            src={`data:image/jpeg;base64,${profile.profile_picture}`}
+                          ></Avatar>
+                        }
+                        title={profile.user_name}
                         sx={{ borderBottom: 1 }}
                       ></CardHeader>
                       <Box
@@ -333,57 +337,4 @@ const ImageUploader = (props) => {
   );
 };
 
-const createpost = () => {
-  return (
-    <Grid container>
-      <Grid item>
-        <SideBar />
-      </Grid>
-      <Grid item>
-        <Card
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignContent: "center",
-            margin: 15,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              m: 1,
-            }}
-          >
-            <CardHeader
-              avatar={<Avatar>R</Avatar>}
-              title="Shah Adil"
-            ></CardHeader>
-            <Divider />
-            <TextField label="Caption" multiline rows={10} />
-            <Button variant="contained" color="primary">
-              Upload
-            </Button>
-          </Box>
-          <Box maxWidth={900} maxHeight={900} sx={{ m: 1 }}>
-            <CardMedia
-              component="img"
-              image="https://images.unsplash.com/photo-1662719012928-4017f17d5b3c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHx0b3BpYy1mZWVkfDN8NnNNVmpUTFNrZVF8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=60"
-              sx={{ mt: 3.4 }}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ width: "100%", mt: 2 }}
-            >
-              Select From Your Computer
-            </Button>
-          </Box>
-        </Card>
-      </Grid>
-    </Grid>
-  );
-};
-
-export default ImageUploader;
+export default CreatePost;

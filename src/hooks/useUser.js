@@ -4,9 +4,6 @@ const useUser = ({ redirectTo = "", redirectIfFound = false }) => {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
 
-  console.log(!token && redirectTo && !redirectIfFound);
-  console.log(token && redirectIfFound);
-
   // if (
   //   (!token && redirectTo && !redirectIfFound) ||
   //   (token && redirectIfFound)

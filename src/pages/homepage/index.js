@@ -1,5 +1,5 @@
 import * as React from "react";
-import SideBar from "../../components/ui/SideBar/SideBar";
+import SideBar from "../../components/ui/SideBar";
 import Post from "../../components/post/Post";
 import Grid from "@mui/material/Grid";
 import SuggestionList from "../../components/ui/SuggestionList";

@@ -20,9 +20,8 @@ import { useTheme } from "@mui/material/styles";
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { authActions } from "../../../store/authReducer";
-import { userActions } from "../../../store/userReducer";
-import client from "../../../utils/api";
+import { authActions } from "../../store/authReducer";
+import client from "../../utils/api";
 
 const style = {
   position: "absolute",
@@ -114,7 +113,7 @@ export default function SideBar() {
           </MenuItem>
           <MenuItem
             icon={<AddCircleIcon />}
-            onClick={() => Router.push("/homepage/createpost")}
+            onClick={() => Router.push("/homepage/post")}
             className="menuItem"
           >
             Create

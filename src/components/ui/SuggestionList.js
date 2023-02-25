@@ -20,7 +20,9 @@ const SuggestionList = () => {
         const suggestedProfile = await client.get("/profile/suggestion", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setProfiles(suggestedProfile.data.profiles);
+        if (suggestedProfile.data.success) {
+          setProfiles(suggestedProfile.data.profiles);
+        }
       } catch (error) {
         console.log(error);
       }
