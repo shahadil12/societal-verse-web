@@ -1,6 +1,6 @@
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import SideBar from "../../../components/ui/SideBar/SideBar";
+import SideBar from "../../../components/ui/SideBar";
 import Brightness5Icon from "@mui/icons-material/Brightness5";
 import { Grid, Avatar } from "@mui/material";
 import ImageList from "@mui/material/ImageList";
@@ -25,13 +25,18 @@ const style = {
 
 export default function Profile() {
   const router = useRouter();
-  const userId = router.query.userId;
+  const [userId, setUserId] = useState(null);
   const token = useSelector((state) => state.auth.token);
   const [posts, setPosts] = useState([]);
   const [value, setValue] = useState(0);
   const [postIndex, setPostIndex] = useState(0);
   const [profile, setProfile] = useState({});
   const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    setUserId(router.query.userId);
+  }, [router.isReady]);
 
   useEffect(() => {
     const posts = async () => {
@@ -42,7 +47,9 @@ export default function Profile() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setPosts(response.data.posts);
+        if (response.data.success) {
+          setPosts(response.data.posts);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -50,17 +57,21 @@ export default function Profile() {
     posts();
 
     const profile = async () => {
+      if (!userId) return;
       try {
         const response = await client.get(`/profile/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setProfile(response.data);
+        console.log(response.data);
+        if (response.data.success) {
+          setProfile(response.data);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     profile();
-  }, []);
+  }, [userId]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -71,6 +82,7 @@ export default function Profile() {
   const followHandler = async () => {
     try {
       if (!isFollowing) {
+        if (!userId) return;
         const response = await client.post(
           `/user/follow/${userId}`,
           {},
@@ -81,16 +93,22 @@ export default function Profile() {
             },
           }
         );
-        if (response.data.success) setIsFollowing(true);
+        if (response.data.success) {
+          setIsFollowing(true);
+          router.reload();
+        }
       }
 
       if (isFollowing) {
-        const response = await client.delete("/follow", {
+        const response = await client.delete("/user/follow", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (response.data.success) setIsFollowing(false);
+        if (response.data.success) {
+          setIsFollowing(false);
+          router.reload();
+        }
       }
     } catch (error) {
       console.log(error);

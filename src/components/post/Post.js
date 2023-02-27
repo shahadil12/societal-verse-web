@@ -4,8 +4,6 @@ import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import IconButton from "@mui/material/IconButton";
@@ -17,19 +15,12 @@ import TagFacesIcon from "@mui/icons-material/TagFaces";
 import FullPost from "./fullPost";
 import useInput from "../../hooks/useInput";
 import SendIcon from "@mui/icons-material/Send";
-import {
-  Avatar,
-  Typography,
-  Modal,
-  Box,
-  Button,
-  TextField,
-  Divider,
-} from "@mui/material";
+import { Avatar, Typography, Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import client from "../../utils/api";
+import Like from "./like";
 
 const isValidComment = /^.{0,500}$/;
 
@@ -40,10 +31,12 @@ export default function Post(props) {
   const [posts, setPosts] = useState([]);
   const [postIndex, setPostIndex] = useState(0);
   const [logOutModalOpen, setLogoutModalOpen] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const [isUserAlreadtLiked, setIsUserAlreadyLiked] = useState(false);
   const handleClose = () => setLogoutModalOpen(false);
-
+  const [likedChanged, setLikeChanged] = useState(
+    posts[postIndex]?.isUserLikedPost
+  );
+  const likeHandler = (likedChanged) => setLikeChanged(likedChanged);
+  const [commentChanged, setCommentChanged] = useState(false);
   const {
     value: enteredComment,
     valueIsValid: enteredCommentIsValid,
@@ -57,7 +50,6 @@ export default function Post(props) {
   if (enteredCommentIsValid) {
     formIsValid = true;
   }
-
   useEffect(() => {
     const getPost = async () => {
       try {
@@ -70,7 +62,7 @@ export default function Post(props) {
       }
     };
     getPost();
-  }, []);
+  }, [likedChanged, commentChanged]);
 
   const commentSubmitHandler = async (event) => {
     try {
@@ -88,36 +80,26 @@ export default function Post(props) {
           },
         }
       );
-
-      enteredCommentReset();
+      if (createComment.data.success) {
+        enteredCommentReset();
+        setCommentChanged((prevState) => {
+          return setCommentChanged(!prevState);
+        });
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const likeHandler = async (postId) => {
+  const commentDeleteHandler = async (commentId) => {
     try {
-      if (!liked) {
-        const response = await client.post(
-          `/post/like/${postId}`,
-          {},
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setLiked(true);
-      }
-
-      if (liked) {
-        const response = await client.delete(`/post/like/${postId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await client.delete(`/post/comment/${commentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setCommentChanged((prevState) => {
+          return setCommentChanged(!prevState);
         });
-        setLiked(false);
       }
     } catch (error) {
       console.log(error);
@@ -138,6 +120,8 @@ export default function Post(props) {
       <FullPost
         post={posts[postIndex]}
         open={logOutModalOpen}
+        commentHandler={commentSubmitHandler}
+        commentDeleteHandler={commentDeleteHandler}
         close={handleClose}
       />
       {posts.map((post, i) => {
@@ -177,19 +161,18 @@ export default function Post(props) {
                 image={`data:image/jpeg;base64,${post?.post?.picture}`}
               />
               <CardActions disableSpacing>
-                <Box
-                  component="form"
-                  noValidate
-                  onSubmit={(e) => {
+                <div
+                  onClick={(e) => {
                     e.preventDefault();
-                    likeHandler(post?.post?.id);
+                    setPostIndex(i);
                   }}
                 >
-                  <IconButton type="submit">
-                    {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                  </IconButton>
-                  {/* <input name="postId" value={post?.post?.id} type="hidden" /> */}
-                </Box>
+                  <Like
+                    userLiked={Boolean(post.isUserLikedPost)}
+                    postId={post?.post?.id}
+                    onLike={likeHandler}
+                  />
+                </div>
                 <Typography variant="h5">
                   <h5>{post?.likes} likes</h5>
                 </Typography>

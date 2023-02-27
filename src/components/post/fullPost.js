@@ -5,7 +5,6 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import IconButton from "@mui/material/IconButton";
@@ -15,16 +14,11 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import SendIcon from "@mui/icons-material/Send";
-
-import {
-  Modal,
-  Box,
-  Button,
-  TextField,
-  Divider,
-  Avatar,
-  Typography,
-} from "@mui/material";
+import { useSelector } from "react-redux";
+import { Modal, Box, Divider, Avatar, Typography, Button } from "@mui/material";
+import client from "../../utils/api";
+import { useRouter } from "next/router";
+import Like from "./like";
 import { useState } from "react";
 
 const style = {
@@ -41,10 +35,7 @@ const style = {
 };
 
 const FullPost = (props) => {
-  const commentSubmitHandler = (event) => {
-    event.preventDefault();
-    console.log(event.target);
-  };
+  const profile = useSelector((state) => state.user.profile);
 
   return (
     <Modal open={props.open} onClose={props.close}>
@@ -99,6 +90,18 @@ const FullPost = (props) => {
                           }
                           secondary={<h6>{comment?.comment}</h6>}
                         ></ListItemText>
+                        {profile.user_id === comment.user_id ? (
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              props.commentDeleteHandler(comment.id);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        ) : (
+                          ""
+                        )}
                       </ListItem>
                       <Divider />
                     </>
@@ -106,9 +109,6 @@ const FullPost = (props) => {
                 })}
               </List>
               <CardActions disableSpacing>
-                <IconButton>
-                  <FavoriteIcon />
-                </IconButton>
                 <Typography variant="h5">
                   <h5>{props?.post?.likes} likes</h5>
                 </Typography>
@@ -117,7 +117,10 @@ const FullPost = (props) => {
               <FormControl
                 fullWidth
                 variant="filled"
-                onSubmit={commentSubmitHandler}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  props.commentHandler(e);
+                }}
               >
                 <InputLabel>Comment</InputLabel>
                 <FilledInput
@@ -133,6 +136,11 @@ const FullPost = (props) => {
                       </IconButton>
                     </InputAdornment>
                   }
+                />
+                <input
+                  name="postId"
+                  value={props.post?.post?.id}
+                  type="hidden"
                 />
               </FormControl>
             </Box>

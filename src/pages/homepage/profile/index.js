@@ -59,12 +59,11 @@ function a11yProps(index) {
 export default function Profile() {
   const Router = useRouter();
   const token = useSelector((state) => state.auth.token);
-  const profile = useSelector((state) => state.user.profile);
-  const followers = useSelector((state) => state.user.followers);
-  const following = useSelector((state) => state.user.following);
+  const userId = useSelector((state) => state.user.profile.user_id);
   const [posts, setPosts] = useState([]);
   const [value, setValue] = useState(0);
   const [postIndex, setPostIndex] = useState(0);
+  const [profile, setProfile] = useState({});
 
   useEffect(() => {
     const posts = async () => {
@@ -75,12 +74,28 @@ export default function Profile() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setPosts(response.data.posts);
+        if (response.data.success) {
+          setPosts(response.data.posts);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     posts();
+
+    const profile = async () => {
+      try {
+        const response = await client.get(`/profile/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data.success) {
+          setProfile(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    profile();
   }, []);
 
   const handleChange = (event, newValue) => {
@@ -119,7 +134,7 @@ export default function Profile() {
               }}
             >
               <Avatar
-                src={`data:image/jpeg;base64,${profile.profile_picture}`}
+                src={`data:image/jpeg;base64,${profile?.profile?.profile_picture}`}
                 sx={{ width: 150, height: 150 }}
               />
             </Box>
@@ -140,7 +155,7 @@ export default function Profile() {
                   justifyContent: "space-between",
                 }}
               >
-                <h2>{profile.user_name}</h2>
+                <h2>{profile?.profile?.user_name}</h2>
                 <Button
                   variant="contained"
                   sx={{ ml: 3 }}
@@ -158,12 +173,12 @@ export default function Profile() {
                   justifyContent: "space-between",
                 }}
               >
-                <h4>{posts.length} posts</h4>
-                <h4>{followers} followers</h4>
-                <h4>{following} following</h4>
+                <h4>{posts?.length} posts</h4>
+                <h4>{profile?.followers} followers</h4>
+                <h4>{profile?.following} following</h4>
               </Box>
               <Box sx={{ ml: 2, mt: 1 }}>
-                <h4>{profile.bio}</h4>
+                <h4>{profile?.profile?.bio}</h4>
               </Box>
             </Box>
           </Box>
