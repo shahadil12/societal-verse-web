@@ -12,6 +12,9 @@ import { Avatar, Divider, IconButton, Box } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import { useDispatch } from "react-redux";
+import { userActions } from "../../store/userReducer";
+import client from "../../utils/api";
 
 const socket = io("http://localhost:5000", {
   reconnectionDelay: 1000,
@@ -26,15 +29,42 @@ const socket = io("http://localhost:5000", {
 });
 
 const MessageContainer = (props) => {
-  const profile = useSelector((state) => state.user.profile);
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.token);
   const [reciverSocketId, setReciverSocketId] = useState({});
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState([]);
 
   console.log(messages);
+  console.log(reciverSocketId);
 
   useEffect(() => {
-    socket.auth = { userId: props.profile.user_id };
+    const sessionId = async () => {
+      try {
+        const response = await client.post(
+          "/user/sessionId",
+          {
+            userId: props.userProfile.user_id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response);
+        if (response.data.session) {
+          socket.auth = { sessionId: response.data.session.id };
+        }
+        if (!response.data.session) {
+          socket.auth = { userId: props?.userProfile?.user_id };
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    sessionId();
     socket.connect();
 
     socket.on("connect", () => {
@@ -49,25 +79,31 @@ const MessageContainer = (props) => {
       console.log(err.message);
     });
 
+    socket.on("private_message", ({ message, from }) => {
+      console.log("hii");
+      setMessages((prevState) => {
+        return [...prevState, { message, fromSelf: false, from }];
+      });
+    });
+
     socket.on("users", (users) => {
       const socketId = users.filter((user) => {
-        return user.userId === props.profile.user_id;
+        return user.user_id === props.profile.user_id;
       });
       setReciverSocketId(socketId[0]);
     });
 
-    socket.on("private_message", (message) => {
-      console.log("bye");
-      setMessages((prevState) => {
-        return [...prevState, { message, fromSelf: false }];
-      });
+    socket.on("session", ({ sessionId, userId }) => {
+      socket.auth = { sessionId };
+      dispatch(userActions.setSessionId(sessionId));
+      socket.userId = userId;
     });
 
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("connection_error");
-      socket.off("users");
+      socket.off("session");
       socket.off("private_message");
     };
   }, []);
@@ -78,9 +114,9 @@ const MessageContainer = (props) => {
     });
     socket.emit("private_message", {
       message,
-      to: reciverSocketId.socketID,
-      toId: props.profile.userId,
-      from: profile.user_id,
+      to: reciverSocketId.socket_id,
+      toId: props.profile.user_id,
+      from: props.userProfile.user_id,
     });
   };
 

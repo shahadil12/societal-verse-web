@@ -126,7 +126,10 @@ export default function Inbox() {
             {isEmptyContainer ? (
               <EmptyContainer />
             ) : (
-              <MessageContainer profile={followingProfile[index]} />
+              <MessageContainer
+                profile={followingProfile[index]}
+                userProfile={profile}
+              />
             )}
           </>
         </Box>

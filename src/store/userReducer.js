@@ -1,6 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialUserState = { followers: 0, following: 0, profile: {} };
+const initialUserState = {
+  followers: 0,
+  following: 0,
+  profile: {},
+  sessionId: "",
+};
 
 const userSlice = createSlice({
   name: "user",
@@ -10,6 +15,9 @@ const userSlice = createSlice({
       state.followers = action.payload.followers;
       state.following = action.payload.following;
       state.profile = action.payload.profile;
+    },
+    setSessionId(state, action) {
+      state.sessionId = action.payload;
     },
   },
 });
