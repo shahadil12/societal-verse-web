@@ -109,21 +109,33 @@ export default function loginPage() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container
+      component="main"
+      maxWidth="xs"
+      sx={{
+        borderRadius: 6,
+        boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+        transition: "0.3s",
+        "&:hover": {
+          transform: "translateY(2px)",
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+        },
+      }}
+    >
       <CssBaseline />
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 7,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
         }}
       >
-        <Avatar>
+        <Avatar sx={{ mt: 2 }}>
           <LockOutlinedIcon fontSize="large" />
         </Avatar>
-        <Typography variant="h4" sx={{ mt: 1 }}>
-          <h4>Log in</h4>
+        <Typography variant="h3" sx={{ mt: 1 }}>
+          Log in
         </Typography>
         <Box
           component="form"
@@ -171,7 +183,7 @@ export default function loginPage() {
             <Grid item xs={12}>
               {hasServerError && (
                 <Alert variant="filled" severity="warning">
-                  <h3>{serverErrorMessage}</h3>
+                  <Typography>{serverErrorMessage}</Typography>
                 </Alert>
               )}
             </Grid>
@@ -184,17 +196,20 @@ export default function loginPage() {
             disabled={!formIsValid}
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign Up
+            <Typography variant="h6">Sign Up</Typography>
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link href="/" variant="body2">
-                <h3>Don't hava an account? Sign up</h3>
+              <Link href="/signup" variant="body2">
+                <Typography variant="h5">
+                  Don't hava an account? Sign up
+                </Typography>
               </Link>
             </Grid>
           </Grid>
         </Box>
       </Box>
+
       <Copyright sx={{ mt: 5 }} />
     </Container>
   );

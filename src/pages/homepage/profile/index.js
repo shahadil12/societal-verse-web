@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import client from "../../../utils/api";
 import UserPost from "../../../components/post/userPost";
 import { useRouter } from "next/router";
+import { Typography } from "@mui/material";
 
 const style = {
   position: "absolute",
@@ -109,7 +110,7 @@ export default function Profile() {
       <Grid item>
         <SideBar />
       </Grid>
-      <Grid item sx={{ display: "flex" }}>
+      <Grid item sx={{ display: "flex", ml: 4 }}>
         <UserPost
           post={posts[postIndex]}
           open={modalOpen}
@@ -121,7 +122,7 @@ export default function Profile() {
             flexDirection: "column",
             width: 800,
             mt: 6,
-            ml: 15,
+            ml: 13,
           }}
         >
           <Box sx={{ display: "flex", mb: 5 }}>
@@ -131,11 +132,18 @@ export default function Profile() {
                 justifyContent: "center",
                 alignContent: "center",
                 marginRight: 5,
+                ml: 5,
+                mt: 4,
               }}
             >
               <Avatar
                 src={`data:image/jpeg;base64,${profile?.profile?.profile_picture}`}
-                sx={{ width: 150, height: 150 }}
+                sx={{
+                  width: 150,
+                  height: 150,
+                  border: 1,
+                  borderColor: "#E2E2E2",
+                }}
               />
             </Box>
             <Box
@@ -155,13 +163,15 @@ export default function Profile() {
                   justifyContent: "space-between",
                 }}
               >
-                <h2>{profile?.profile?.user_name}</h2>
+                <Typography variant="h3" sx={{ mr: 2 }}>
+                  {profile?.profile?.user_name}
+                </Typography>
                 <Button
                   variant="contained"
                   sx={{ ml: 3 }}
                   onClick={() => Router.push(`/homepage/profile/edit`)}
                 >
-                  <h5>Edit Profile</h5>
+                  <Typography>Edit Profile</Typography>
                 </Button>
                 <Brightness5Icon sx={{ mt: 0.5, ml: 0.5 }} />
               </Box>
@@ -173,12 +183,16 @@ export default function Profile() {
                   justifyContent: "space-between",
                 }}
               >
-                <h4>{posts?.length} posts</h4>
-                <h4>{profile?.followers} followers</h4>
-                <h4>{profile?.following} following</h4>
+                <Typography variant="h5">{posts?.length} posts</Typography>
+                <Typography variant="h5">
+                  {profile?.followers} followers
+                </Typography>
+                <Typography variant="h5">
+                  {profile?.following} following
+                </Typography>
               </Box>
               <Box sx={{ ml: 2, mt: 1 }}>
-                <h4>{profile?.profile?.bio}</h4>
+                <Typography variant="h6">{profile?.profile?.bio}</Typography>
               </Box>
             </Box>
           </Box>
@@ -191,8 +205,14 @@ export default function Profile() {
               }}
             >
               <Tabs value={value} onChange={handleChange} centered>
-                <Tab label="Post" {...a11yProps(0)} />
-                <Tab label="Saved" {...a11yProps(0)} />
+                <Tab
+                  label={<Typography variant="h6">Posts</Typography>}
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  label={<Typography variant="h6">Saved</Typography>}
+                  {...a11yProps(0)}
+                />
               </Tabs>
             </Box>
             <Box
@@ -200,6 +220,7 @@ export default function Profile() {
                 display: "flex",
                 justifyContent: "center",
                 mt: 1,
+                ml: 25,
               }}
             >
               <TabPanel value={value} index={0}>
@@ -217,6 +238,7 @@ export default function Profile() {
                         }}
                         src={`data:image/jpeg;base64,${post?.post?.picture}`}
                         loading="lazy"
+                        style={{ height: "200px" }}
                       />
                     </ImageListItem>
                   ))}
@@ -224,7 +246,9 @@ export default function Profile() {
               </TabPanel>
 
               <TabPanel value={value} index={1}>
-                <h4>Only you can see what you've saved.</h4>
+                <Typography variant="h5">
+                  Only you can see what you've saved.
+                </Typography>
               </TabPanel>
             </Box>
           </Box>

@@ -2,6 +2,7 @@ import SideBar from "../../../components/ui/SideBar";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
+import { Typography } from "@mui/material";
 // import { fileTypeFromBuffer } from "file-type";
 import {
   Grid,
@@ -27,9 +28,9 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 2,
+  border: "1px solid #E2E2E2",
+  boxShadow:
+    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
 };
 
 const maxNumber = 1;
@@ -126,11 +127,12 @@ const EditPost = () => {
             justifyContent: "center",
             alignContent: "center",
             alignItems: "center",
-            p: 3,
           }}
         >
           <CheckCircleIcon sx={{ fontSize: 70 }} />
-          <h3 style={{ marginLeft: 30 }}>Post Updated Successfully.</h3>
+          <Typography variant="h4" sx={{ ml: 4 }}>
+            Post Updated Successfully.
+          </Typography>
         </Box>
       </Box>
     </Modal>
@@ -159,8 +161,17 @@ const EditPost = () => {
                     display: "flex",
                     justifyContent: "center",
                     alignContent: "center",
-                    marginTop: 11,
-                    marginLeft: 17,
+                    marginTop: 10,
+                    marginLeft: 20,
+                    borderRadius: 4,
+                    border: 1,
+                    borderColor: "#E2E2E2",
+                    boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "translateY(2px)",
+                      boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                    },
                   }}
                 >
                   <Box
@@ -175,10 +186,11 @@ const EditPost = () => {
                       avatar={
                         <Avatar
                           src={`data:image/jpeg;base64,${profile.profile_picture}`}
+                          sx={{ border: 1, borderColor: "#E2E2E2" }}
                         ></Avatar>
                       }
                       title={<h4>{profile.user_name}</h4>}
-                      sx={{ borderBottom: 1 }}
+                      sx={{ borderBottom: 1, borderColor: "#E2E2E2" }}
                     ></CardHeader>
                     <Box
                       sx={{
@@ -187,7 +199,7 @@ const EditPost = () => {
                       }}
                     >
                       <Button variant="contained" onClick={onImageUpdate}>
-                        Update
+                        <Typography>Update</Typography>
                       </Button>
                     </Box>
                     <Box
@@ -199,13 +211,13 @@ const EditPost = () => {
                       <TextField
                         label="Caption"
                         multiline
-                        rows={10}
+                        rows={12}
                         value={caption}
-                        sx={{ mb: 0.5 }}
+                        sx={{ mb: 1 }}
                       />
                       {hasServerError && (
                         <Alert variant="filled" severity="warning">
-                          <h3>{serverErrorMessage}</h3>
+                          <Typography>{serverErrorMessage}</Typography>
                         </Alert>
                       )}
                       <Button
@@ -221,7 +233,7 @@ const EditPost = () => {
                   <Box
                     width={500}
                     height={500}
-                    sx={{ m: 1, borderLeft: 1, pl: 3 }}
+                    sx={{ m: 1, borderLeft: 1, borderColor: "#E2E2E2", pl: 3 }}
                   >
                     <CardMedia
                       component="img"

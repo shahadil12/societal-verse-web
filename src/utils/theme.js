@@ -75,7 +75,8 @@ export const themeSettings = (mode) => {
     },
     typography: {
       fontFamily: ["QuickSand", "sans-serif"].join(","),
-      fontSize: 14,
+      fontSize: 12,
+
       h1: {
         fontFamily: ["QuickSand", "sans-serif"].join(","),
         fontSize: 40,

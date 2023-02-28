@@ -4,6 +4,7 @@ import Image from "next/image";
 import Alert from "@mui/material/Alert";
 
 import { useState } from "react";
+import { Box } from "@mui/system";
 
 const maxNumber = 1;
 
@@ -33,27 +34,39 @@ const ImageUploader = (props) => {
         errors,
       }) => (
         <>
-          <Button
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            onClick={onImageUpload}
-          >
-            Click Here To Upload Profile Picture
-          </Button>
+          {!(imageList.length > 0) && (
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              onClick={onImageUpload}
+            >
+              Click Here To Upload Profile Picture
+            </Button>
+          )}
+
           {imageList.length > 0 && (
             <>
-              <Image
-                alt="profilePicture"
-                src={imageList[0]["data_url"]}
-                width="150"
-                height="150"
-                className="profile"
-              />
+              <Box>
+                <Image
+                  alt="profilePicture"
+                  src={imageList[0]["data_url"]}
+                  width="150"
+                  height="150"
+                  className="profile"
+                  style={{
+                    borderRadius: "50%",
+                    marginLeft: "15px",
+                    marginBottom: "5px",
+                    border: "1px solid",
+                    borderColor: "#C2C2C2",
+                  }}
+                />
+              </Box>
               <Button
                 variant="contained"
                 onClick={onImageUpdate}
-                sx={{ mr: 2 }}
+                sx={{ mr: 2, ml: 2 }}
               >
                 Update
               </Button>

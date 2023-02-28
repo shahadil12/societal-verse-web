@@ -8,7 +8,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CardMedia from "@mui/material/CardMedia";
 import Popover from "@mui/material/Popover";
 import IconButton from "@mui/material/IconButton";
-import { Modal, Box, Divider, Avatar, Button } from "@mui/material";
+import { Modal, Box, Divider, Avatar, Button, Typography } from "@mui/material";
 import { useState } from "react";
 import client from "../../utils/api";
 import { useSelector } from "react-redux";
@@ -21,10 +21,9 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 900,
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  padding: 0,
-  margin: 0,
+  border: "1px solid #E2E2E2",
+  boxShadow:
+    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
 };
 
 const UserPost = (props) => {
@@ -68,12 +67,14 @@ const UserPost = (props) => {
               width: "100%",
               height: "100%",
               borderRight: 1,
+              borderColor: "#E2E2E2",
             }}
           >
             <CardHeader
               avatar={
                 <Avatar
                   src={`data:image/jpeg;base64,${props?.post?.userDetail?.thumbnail_profile_picture}`}
+                  sx={{ border: 1, borderColor: "#E2E2E2" }}
                 />
               }
               action={
@@ -105,7 +106,7 @@ const UserPost = (props) => {
                           postEditHandler(props?.post?.post?.id);
                         }}
                       >
-                        Edit
+                        <Typography>Edit</Typography>
                       </Button>
                       <Divider />
                       <Button
@@ -114,14 +115,18 @@ const UserPost = (props) => {
                           postDeleteHandler(props.post?.post?.id);
                         }}
                       >
-                        Delete
+                        <Typography> Delete</Typography>
                       </Button>
                     </Box>
                   </Popover>
                 </>
               }
-              title={props?.post?.userDetail?.user_name}
-              sx={{ borderBottom: 1 }}
+              title={
+                <Typography variant="h5">
+                  {props?.post?.userDetail?.user_name}
+                </Typography>
+              }
+              sx={{ borderBottom: 1, borderColor: "#E2E2E2" }}
             ></CardHeader>
             <Box
               sx={{
@@ -129,7 +134,7 @@ const UserPost = (props) => {
                 flexDirection: "column",
               }}
             >
-              <List sx={{ height: 331, maxHeight: 331, overflow: "auto" }}>
+              <List sx={{ height: 400, maxHeight: 400, overflow: "auto" }}>
                 {props?.post?.comments.map((comment, i) => {
                   return (
                     <>
@@ -137,15 +142,18 @@ const UserPost = (props) => {
                         <ListItemAvatar>
                           <Avatar
                             src={`data:image/jpeg;base64,${props?.post?.commenterDetails[i]?.thumbnail_profile_picture}`}
+                            sx={{ border: 1, borderColor: "#E2E2E2" }}
                           />
                         </ListItemAvatar>
                         <ListItemText
                           primary={
-                            <h5>
+                            <Typography variant="h6">
                               {props?.post?.commenterDetails[i]?.user_name}
-                            </h5>
+                            </Typography>
                           }
-                          secondary={<h6>{comment?.comment}</h6>}
+                          secondary={
+                            <Typography>{comment?.comment}</Typography>
+                          }
                         ></ListItemText>
                       </ListItem>
                       <Divider />
@@ -153,14 +161,10 @@ const UserPost = (props) => {
                   );
                 })}
               </List>
-              <h6 style={{ marginLeft: 18 }}>28 MINUTES AGO</h6>
+              <Typography style={{ marginLeft: 18 }}>28 MINUTES AGO</Typography>
             </Box>
           </Box>
-          <Box
-            width={500}
-            height={500}
-            sx={{ mt: 2, mb: 2, maxHeight: 500, maxWidth: 500 }}
-          >
+          <Box width={500} height={500} sx={{ maxHeight: 500, maxWidth: 500 }}>
             <CardMedia
               component="img"
               image={`data:image/jpeg;base64,${props?.post?.post?.picture}`}

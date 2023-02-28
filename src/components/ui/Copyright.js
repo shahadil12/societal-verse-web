@@ -9,7 +9,7 @@ import { Box } from "@mui/system";
 
 const Copyright = (props) => {
   return (
-    <>
+    <Box>
       <Typography
         variant="body2"
         color="text.secondary"
@@ -23,24 +23,15 @@ const Copyright = (props) => {
         {new Date().getFullYear()}
         {"."}
       </Typography>
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2, p: 2 }}>
         <SocialProvider useStyles={useMoonSocialLinkStyles}>
-          <SocialLink
-            brand={"FacebookCircle"}
-            href={"https://www.facebook.com/siriwat.kunaporn/"}
-          />
-          <SocialLink
-            brand={"Twitter"}
-            href={"https://twitter.com/siriwatknp"}
-          />
+          <SocialLink brand={"FacebookCircle"} href={""} />
+          <SocialLink brand={"Twitter"} href={""} />
           <SocialLink brand={"Instagram"} href={""} />
-          <SocialLink
-            brand={"LinkedIn"}
-            href={"https://www.linkedin.com/in/siriwat-kunaporn-1b4095158/"}
-          />
+          <SocialLink brand={"LinkedIn"} href={""} />
         </SocialProvider>
       </Box>
-    </>
+    </Box>
   );
 };
 

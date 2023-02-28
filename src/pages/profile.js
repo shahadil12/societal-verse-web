@@ -146,22 +146,38 @@ export default function profileSetupPage() {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container
+      component="main"
+      maxWidth="sm"
+      sx={{
+        borderRadius: 7,
+        boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+        transition: "0.3s",
+        "&:hover": {
+          transform: "translateY(2px)",
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+        },
+      }}
+    >
       <CssBaseline />
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 3,
           display: "flex",
           flexDirection: "column",
           alignItems: "centre",
         }}
       >
-        <Avatar>
-          <AccountCircleIcon sx={{ fontSize: 60 }} />
-        </Avatar>
-        <Typography component="h1" variant="h3">
-          Create Profile
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Avatar>
+            <AccountCircleIcon sx={{ fontSize: 60 }} />
+          </Avatar>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Typography variant="h3" sx={{ mt: 2 }}>
+            Create Profile
+          </Typography>
+        </Box>
         <Box
           component="form"
           noValidate

@@ -8,8 +8,11 @@ import ImageListItem from "@mui/material/ImageListItem";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import client from "../../../utils/api";
-import UserPost from "../../../components/post/userPost";
 import { useRouter } from "next/router";
+import FullPost from "../../../components/post/fullPost";
+import { Typography } from "@mui/material";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 const style = {
   position: "absolute",
   top: "50%",
@@ -22,6 +25,26 @@ const style = {
   padding: 0,
   margin: 0,
 };
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
 
 export default function Profile() {
   const router = useRouter();
@@ -39,14 +62,38 @@ export default function Profile() {
   }, [router.isReady]);
 
   useEffect(() => {
-    const posts = async () => {
+    const getProfile = async () => {
+      if (!userId) return;
       try {
-        const response = await client.get("/profile/posts", {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await client.get(`/profile/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (response.data.success) {
+          setProfile(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getProfile();
+
+    const posts = async () => {
+      if (!userId) return;
+      try {
+        const response = await client.post(
+          `/profile/showSpecificProfilePosts`,
+          {
+            userId: userId,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response);
         if (response.data.success) {
           setPosts(response.data.posts);
         }
@@ -55,22 +102,6 @@ export default function Profile() {
       }
     };
     posts();
-
-    const profile = async () => {
-      if (!userId) return;
-      try {
-        const response = await client.get(`/profile/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log(response.data);
-        if (response.data.success) {
-          setProfile(response.data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    profile();
   }, [userId]);
 
   const handleChange = (event, newValue) => {
@@ -121,7 +152,7 @@ export default function Profile() {
         <SideBar />
       </Grid>
       <Grid item sx={{ display: "flex" }}>
-        <UserPost
+        <FullPost
           post={posts[postIndex]}
           open={modalOpen}
           close={handleClose}
@@ -132,7 +163,7 @@ export default function Profile() {
             flexDirection: "column",
             width: 800,
             mt: 6,
-            ml: 15,
+            ml: 16,
           }}
         >
           <Box sx={{ display: "flex", mb: 5 }}>
@@ -142,11 +173,18 @@ export default function Profile() {
                 justifyContent: "center",
                 alignContent: "center",
                 marginRight: 5,
+                ml: 5,
+                mt: 4,
               }}
             >
               <Avatar
                 src={`data:image/jpeg;base64,${profile?.profile?.profile_picture}`}
-                sx={{ width: 150, height: 150 }}
+                sx={{
+                  width: 150,
+                  height: 150,
+                  border: 1,
+                  borderColor: "#E2E2E2",
+                }}
               />
             </Box>
             <Box
@@ -166,13 +204,17 @@ export default function Profile() {
                   justifyContent: "space-between",
                 }}
               >
-                <h2>{profile?.profile?.user_name}</h2>
+                <Typography variant="h3" sx={{ mr: 2 }}>
+                  {profile?.profile?.user_name}
+                </Typography>
                 <Button
                   variant="contained"
                   sx={{ ml: 3 }}
                   onClick={followHandler}
                 >
-                  <h5>{isFollowing ? "Following" : "Follow"}</h5>
+                  <Typography>
+                    {isFollowing ? "Following" : "Follow"}
+                  </Typography>
                 </Button>
               </Box>
               <Box
@@ -183,41 +225,62 @@ export default function Profile() {
                   justifyContent: "space-between",
                 }}
               >
-                <h4>{posts.length} posts</h4>
-                <h4>{profile?.followers} followers</h4>
-                <h4>{profile?.following} following</h4>
+                <Typography variant="h5" sx={{ mr: 3 }}>
+                  {posts?.length} posts
+                </Typography>
+                <Typography variant="h5" sx={{ mr: 3 }}>
+                  {profile?.followers} followers
+                </Typography>
+                <Typography variant="h5">
+                  {profile?.following} following
+                </Typography>
               </Box>
               <Box sx={{ ml: 2, mt: 1 }}>
-                <h4>{profile?.profile?.bio}</h4>
+                <Typography variant="h6">{profile?.profile?.bio}</Typography>
               </Box>
             </Box>
           </Box>
           <Box sx={{ width: "100%" }}>
             <Box
               sx={{
+                borderBottom: 1,
+                borderColor: "divider",
+                mt: 1.5,
+              }}
+            >
+              <Tabs centered>
+                <Tab label={<Typography variant="h6">Posts</Typography>} />
+              </Tabs>
+            </Box>
+            <Box
+              sx={{
                 display: "flex",
                 justifyContent: "center",
                 mt: 1,
+                ml: 30,
               }}
             >
-              <ImageList
-                sx={{ width: 700, height: 400, mt: 2 }}
-                cols={3}
-                rowHeight={250}
-              >
-                {posts.map((post, i) => (
-                  <ImageListItem key={i}>
-                    <img
-                      onClick={() => {
-                        setModalOpen(true);
-                        setPostIndex(i);
-                      }}
-                      src={`data:image/jpeg;base64,${post?.post?.picture}`}
-                      loading="lazy"
-                    />
-                  </ImageListItem>
-                ))}
-              </ImageList>
+              <TabPanel>
+                <ImageList
+                  sx={{ width: 700, height: 300 }}
+                  cols={3}
+                  rowHeight={250}
+                >
+                  {posts.map((post, i) => (
+                    <ImageListItem key={i}>
+                      <img
+                        onClick={() => {
+                          setModalOpen(true);
+                          setPostIndex(i);
+                        }}
+                        src={`data:image/jpeg;base64,${post?.post?.picture}`}
+                        loading="lazy"
+                        style={{ height: "200px" }}
+                      />
+                    </ImageListItem>
+                  ))}
+                </ImageList>
+              </TabPanel>
             </Box>
           </Box>
         </Box>

@@ -20,6 +20,7 @@ import client from "../../utils/api";
 import { useRouter } from "next/router";
 import Like from "./like";
 import { useState } from "react";
+import { borderColor } from "@mui/system";
 
 const style = {
   position: "absolute",
@@ -28,17 +29,16 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 900,
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  padding: 0,
-  margin: 0,
+  border: "1px solid #E2E2E2",
+  boxShadow:
+    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
 };
 
 const FullPost = (props) => {
   const profile = useSelector((state) => state.user.profile);
 
   return (
-    <Modal open={props.open} onClose={props.close}>
+    <Modal open={props.open} onClose={props.close} sx={{ transition: "0.5s" }}>
       <Box sx={style}>
         <Card
           sx={{
@@ -54,17 +54,25 @@ const FullPost = (props) => {
               justifyContent: "space-between",
               width: "100%",
               height: "100%",
-              borderRight: 1,
+              borderColor: "#E2E2E2",
             }}
           >
             <CardHeader
               avatar={
                 <Avatar
                   src={`data:image/jpeg;base64,${props?.post?.userDetail?.thumbnail_profile_picture}`}
+                  sx={{
+                    border: 1,
+                    borderColor: "#E2E2E2",
+                  }}
                 />
               }
-              title={props?.post?.userDetail?.user_name}
-              sx={{ borderBottom: 1 }}
+              title={
+                <Typography variant="h5">
+                  {props?.post?.userDetail?.user_name}
+                </Typography>
+              }
+              sx={{ borderBottom: 1, border: 1, borderColor: "#E2E2E2" }}
             ></CardHeader>
             <Box
               sx={{
@@ -80,15 +88,21 @@ const FullPost = (props) => {
                         <ListItemAvatar>
                           <Avatar
                             src={`data:image/jpeg;base64,${props?.post?.commenterDetails[i]?.thumbnail_profile_picture}`}
+                            sx={{
+                              border: 1,
+                              borderColor: "#E2E2E2",
+                            }}
                           />
                         </ListItemAvatar>
                         <ListItemText
                           primary={
-                            <h5>
+                            <Typography variant="h5">
                               {props?.post?.commenterDetails[i]?.user_name}
-                            </h5>
+                            </Typography>
                           }
-                          secondary={<h6>{comment?.comment}</h6>}
+                          secondary={
+                            <Typography>{comment?.comment}</Typography>
+                          }
                         ></ListItemText>
                         {profile.user_id === comment.user_id ? (
                           <Button
@@ -97,7 +111,7 @@ const FullPost = (props) => {
                               props.commentDeleteHandler(comment.id);
                             }}
                           >
-                            Delete
+                            <Typography>Delete</Typography>
                           </Button>
                         ) : (
                           ""
@@ -109,11 +123,11 @@ const FullPost = (props) => {
                 })}
               </List>
               <CardActions disableSpacing>
-                <Typography variant="h5">
-                  <h5>{props?.post?.likes} likes</h5>
+                <Typography variant="h5" sx={{ ml: 1 }}>
+                  {props?.post?.likes} likes
                 </Typography>
               </CardActions>
-              <h6 style={{ marginLeft: 18 }}>28 MINUTES AGO</h6>
+              <Typography sx={{ ml: 2 }}>28 MINUTES AGO</Typography>
               <FormControl
                 fullWidth
                 variant="filled"
@@ -145,11 +159,7 @@ const FullPost = (props) => {
               </FormControl>
             </Box>
           </Box>
-          <Box
-            width={500}
-            height={500}
-            sx={{ mt: 2, mb: 2, maxHeight: 500, maxWidth: 500 }}
-          >
+          <Box width={500} height={500} sx={{ maxHeight: 500, maxWidth: 500 }}>
             <CardMedia
               component="img"
               image={`data:image/jpeg;base64,${props?.post?.post?.picture}`}

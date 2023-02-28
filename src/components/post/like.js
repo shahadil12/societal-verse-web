@@ -57,7 +57,11 @@ const Like = (props) => {
           likeHandler(props?.postId);
         }}
       >
-        {liked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+        {liked ? (
+          <FavoriteIcon sx={{ color: "red" }} />
+        ) : (
+          <FavoriteBorderIcon />
+        )}
       </IconButton>
     </>
   );

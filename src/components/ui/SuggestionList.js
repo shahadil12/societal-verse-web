@@ -4,11 +4,11 @@ import ListItem from "@mui/material/ListItem";
 import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Avatar, Button, ListSubheader } from "@mui/material";
 import { useState, useEffect } from "react";
 import client from "../../utils/api";
 import { useSelector } from "react-redux";
+import { Typography } from "@mui/material";
 
 const SuggestionList = () => {
   const token = useSelector((state) => state.auth.token);
@@ -31,10 +31,22 @@ const SuggestionList = () => {
   }, []);
   return (
     <List
-      sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper", mt: 7 }}
+      sx={{
+        width: "100%",
+        maxWidth: 360,
+        bgcolor: "background.paper",
+        mt: 7,
+        borderRadius: 2,
+        border: 1,
+        borderColor: "#E0E0E0",
+        boxShadow:
+          "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
+      }}
       subheader={
-        <ListSubheader>
-          <h3>Who to follow</h3>
+        <ListSubheader sx={{ borderBottom: 1, borderColor: "#E0E0E0" }}>
+          <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>
+            Who to follow
+          </Typography>
         </ListSubheader>
       }
     >
@@ -48,14 +60,15 @@ const SuggestionList = () => {
                 />
               </ListItemAvatar>
               <ListItemText
-                primary={profile.user_name}
+                primary={
+                  <Typography variant="h6">{profile.user_name}</Typography>
+                }
                 sx={{ mr: 10, mt: 2 }}
               />
               <Button variant="outlined" sx={{ fontSize: 13, mt: 1.2 }}>
-                <h4> Follow</h4>
+                <Typography>Follow</Typography>
               </Button>
             </ListItem>
-            <Divider variant="inset" component="li" />
           </>
         );
       })}

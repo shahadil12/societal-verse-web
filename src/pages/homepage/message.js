@@ -5,7 +5,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import SideBar from "../../components/ui/SideBar";
-import { Avatar, Grid } from "@mui/material";
+import { Avatar, Grid, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import client from "../../utils/api";
@@ -18,6 +18,13 @@ export default function Inbox() {
   const [followingProfile, setFollowingProfile] = useState([]);
   const [isEmptyContainer, setIsEmptyContainer] = useState(true);
   const [index, setIndex] = useState(0);
+  const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState("");
+
+  const messageHandler = (message) =>
+    setMessages((prevState) => {
+      return [...prevState, message];
+    });
 
   useEffect(() => {
     const followingProfile = async () => {
@@ -47,6 +54,51 @@ export default function Inbox() {
       }
     };
     profile();
+    const messages = async () => {
+      try {
+        const response = await client.post(
+          "/user/messages",
+          {
+            userId: props.profile.user_id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data.success) {
+          setMessages(response.data.messages);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    messages();
+
+    const getSessionId = async () => {
+      try {
+        const response = await client.post(
+          "/user/sessionId",
+          {
+            userId: props.userProfile.user_id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data.session) {
+          setSessionId(response.data.session.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getSessionId();
   }, []);
 
   return (
@@ -62,14 +114,21 @@ export default function Inbox() {
           width: "100%",
           maxWidth: "935px",
           border: 1,
-          margin: 8,
+          borderRadius: 4,
+          borderColor: "#E2E2E2",
+          ml: 13,
+          mt: 7,
+          boxShadow:
+            "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
         }}
       >
         <Box sx={{ display: "flex", width: "250px" }}>
           <List
             sx={{
               border: 1,
+              borderColor: "#E2E2E2",
               width: "450px",
+              borderRadius: 4,
             }}
             subheader={
               <>
@@ -80,9 +139,10 @@ export default function Inbox() {
                     alignContent: "center",
                     alignItems: "center",
                     height: "70px",
+                    borderRadius: 4,
                   }}
                 >
-                  <h3>{profile.user_name}</h3>
+                  <Typography variant="h4">{profile.user_name}</Typography>
                 </ListSubheader>
                 <Divider />
               </>
@@ -101,12 +161,17 @@ export default function Inbox() {
                     <ListItemAvatar>
                       <Avatar
                         src={`data:image/jpeg;base64,${profile?.profile_picture}`}
-                        sx={{ width: 55, height: 55 }}
+                        sx={{
+                          width: 55,
+                          height: 55,
+                          border: 1,
+                          borderColor: "#E2E2E2",
+                        }}
                       />
                     </ListItemAvatar>
-                    <h4 style={{ paddingLeft: 10, paddingBottom: 20 }}>
+                    <Typography variant="h5" sx={{ ml: 2 }}>
                       {profile.user_name}
-                    </h4>
+                    </Typography>
                   </ListItem>
                   <Divider />
                 </>
@@ -114,25 +179,17 @@ export default function Inbox() {
             })}
           </List>
         </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "550px",
-            width: "700px",
-          }}
-        >
-          <>
-            {isEmptyContainer ? (
-              <EmptyContainer />
-            ) : (
-              <MessageContainer
-                profile={followingProfile[index]}
-                userProfile={profile}
-              />
-            )}
-          </>
-        </Box>
+        {isEmptyContainer ? (
+          <EmptyContainer />
+        ) : (
+          <MessageContainer
+            profile={followingProfile[index]}
+            userProfile={profile}
+            sessionId={sessionId}
+            messages={messages}
+            setMessages={messageHandler}
+          />
+        )}
       </Grid>
     </Grid>
   );

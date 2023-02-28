@@ -15,7 +15,7 @@ import TagFacesIcon from "@mui/icons-material/TagFaces";
 import FullPost from "./fullPost";
 import useInput from "../../hooks/useInput";
 import SendIcon from "@mui/icons-material/Send";
-import { Avatar, Typography, Box } from "@mui/material";
+import { Avatar, Typography, Box, Divider } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
@@ -127,7 +127,20 @@ export default function Post(props) {
       {posts.map((post, i) => {
         return (
           <>
-            <Card sx={{ maxWidth: 500, ml: 14, mr: 8, mt: 7 }}>
+            <Card
+              sx={{
+                maxWidth: 500,
+                ml: 18,
+                mr: 10,
+                mt: 7,
+                borderRadius: 2,
+                border: 1,
+                borderColor: "#E0E0E0",
+                p: 0,
+                boxShadow:
+                  "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
+              }}
+            >
               <CardHeader
                 avatar={
                   <Box
@@ -138,6 +151,7 @@ export default function Post(props) {
                     <IconButton type="submit">
                       <Avatar
                         src={`data:image/jpeg;base64,${post?.userDetail?.thumbnail_profile_picture}`}
+                        sx={{ border: 1, borderColor: "#E0E0E0" }}
                       />
                     </IconButton>
                     <input
@@ -147,14 +161,12 @@ export default function Post(props) {
                     />
                   </Box>
                 }
-                subheader={<h3>{post?.userDetail?.user_name}</h3>}
-                action={
-                  <IconButton aria-label="settings">
-                    <MoreVertIcon />
-                  </IconButton>
+                subheader={
+                  <Typography variant="h5">
+                    {post?.userDetail?.user_name}
+                  </Typography>
                 }
               />
-
               <CardMedia
                 component="img"
                 height="350"
@@ -173,9 +185,7 @@ export default function Post(props) {
                     onLike={likeHandler}
                   />
                 </div>
-                <Typography variant="h5">
-                  <h5>{post?.likes} likes</h5>
-                </Typography>
+                <Typography variant="h6">{post?.likes} likes</Typography>
                 <IconButton
                   sx={{ ml: 1 }}
                   onClick={() => {
@@ -184,26 +194,27 @@ export default function Post(props) {
                   }}
                 >
                   <ChatBubbleOutlineIcon />
-                  <Typography variant="h5" sx={{ ml: 1 }}>
-                    <h5>View all {post?.comments?.length} comments</h5>
+                  <Typography sx={{ ml: 1 }}>
+                    View all {post?.comments?.length} comments
                   </Typography>
                 </IconButton>
               </CardActions>
               <CardContent>
-                <h4>
-                  <strong>{post?.userDetail?.user_name}</strong>
+                <Typography variant="h6">
+                  <strong>{post?.userDetail?.user_name} </strong>
                   {post?.post?.caption}
-                </h4>
-                <h5>
+                </Typography>
+                <Typography>
                   <br />
                   28 MINUTES AGO
-                </h5>
+                </Typography>
                 <Box
                   component="form"
                   noValidate
                   onSubmit={commentSubmitHandler}
+                  sx={{ width: "100%", mt: 1 }}
                 >
-                  <FormControl fullWidth sx={{ m: 1 }} variant="filled">
+                  <FormControl fullWidth variant="filled">
                     <InputLabel>Comment</InputLabel>
                     <FilledInput
                       value={enteredComment}

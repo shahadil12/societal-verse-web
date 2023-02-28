@@ -110,21 +110,33 @@ export default function SignUpPage() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container
+      component="main"
+      maxWidth="xs"
+      sx={{
+        borderRadius: 7,
+        boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+        transition: "0.3s",
+        "&:hover": {
+          transform: "translateY(2px)",
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+        },
+      }}
+    >
       <CssBaseline />
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 5,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
         }}
       >
-        <Avatar>
+        <Avatar sx={{ mt: 2 }}>
           <LoginIcon fontSize="large" />
         </Avatar>
         <Typography variant="h4" sx={{ mt: 1 }}>
-          <h4> Sign up</h4>
+          Sign up
         </Typography>
         <Box
           component="form"
@@ -140,17 +152,15 @@ export default function SignUpPage() {
                 fullWidth
                 autoComplete="given-name"
                 name="fullname"
-                label={<h4 style={{ display: "inline" }}>Full Name</h4>}
+                label="Full Name"
                 value={enteredName}
                 onChange={nameChangeHandler}
                 onBlur={nameBlurHandler}
                 error={enteredNameHasError}
                 helperText={
-                  enteredNameHasError ? (
-                    <h4>Full name should be less than 20 characters</h4>
-                  ) : (
-                    ""
-                  )
+                  enteredNameHasError
+                    ? "Full name should be less than 20 characters"
+                    : ""
                 }
               />
             </Grid>
@@ -211,8 +221,8 @@ export default function SignUpPage() {
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link href="/" variant="body2">
-                <h4>Already have an account? Log in</h4>
+              <Link href="/" variant="body1">
+                <Typography>Already have an account? Log in</Typography>
               </Link>
             </Grid>
           </Grid>

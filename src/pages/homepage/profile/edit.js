@@ -137,22 +137,38 @@ export default function profileSetupPage() {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container
+      component="main"
+      maxWidth="sm"
+      sx={{
+        borderRadius: 7,
+        boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+        transition: "0.3s",
+        "&:hover": {
+          transform: "translateY(2px)",
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+        },
+      }}
+    >
       <CssBaseline />
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: 6,
           display: "flex",
           flexDirection: "column",
           alignItems: "centre",
         }}
       >
-        <Avatar>
-          <AccountCircleIcon sx={{ fontSize: 60 }} />
-        </Avatar>
-        <Typography component="h1" variant="h3">
-          Edit Profile
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <Avatar>
+            <AccountCircleIcon sx={{ fontSize: 60 }} />
+          </Avatar>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Typography variant="h3" sx={{ mt: 2 }}>
+            Edit Profile
+          </Typography>
+        </Box>
         <Box
           component="form"
           noValidate
@@ -220,18 +236,26 @@ export default function profileSetupPage() {
               >
                 {({ imageList, onImageUpdate, errors }) => (
                   <>
-                    <img
-                      src={imageList[0]?.data_url}
-                      width="150"
-                      height="150"
-                      className="profile"
-                    />
+                    <Box>
+                      <img
+                        src={imageList[0]?.data_url}
+                        width="150"
+                        height="150"
+                        style={{
+                          borderRadius: "50%",
+                          marginLeft: "15px",
+                          marginBottom: "5px",
+                          border: "0.5px solid",
+                          borderColor: "#C2C2C2",
+                        }}
+                      />
+                    </Box>
                     <Button
                       variant="contained"
                       onClick={onImageUpdate}
-                      sx={{ mr: 2 }}
+                      sx={{ mr: 2, ml: 6, mb: 2 }}
                     >
-                      Update
+                      <Typography>Update</Typography>
                     </Button>
                     {errors && (
                       <div>
@@ -308,7 +332,7 @@ export default function profileSetupPage() {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Set Up Profile
+            <Typography>Set Up Profile</Typography>
           </Button>
         </Box>
       </Box>

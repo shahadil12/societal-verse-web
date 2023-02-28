@@ -14,6 +14,8 @@ import BrightnessHighIcon from "@mui/icons-material/BrightnessHigh";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "@mui/material/styles";
@@ -30,8 +32,9 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
+  border: "1px solid #E2E2E2",
+  boxShadow:
+    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
   p: 2,
 };
 
@@ -45,6 +48,8 @@ export default function SideBar() {
   const token = useSelector((state) => state.auth.token);
   const handleClose = () => setLogoutModalOpen(false);
   const modeHandler = () => dispatch(authActions.setMode());
+
+  const matches = useMediaQuery("(min-width:600px)");
 
   const logoutHandler = async () => {
     try {
@@ -72,20 +77,62 @@ export default function SideBar() {
   };
 
   const modeIcon =
-    defaultMode === "dark" ? <BrightnessHighIcon /> : <Brightness4Icon />;
+    defaultMode === "dark" ? (
+      <BrightnessHighIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <Brightness4Icon sx={{ fontSize: 26 }} />
+    );
 
   const bcSidebar = defaultMode === "dark" ? "#000000" : "#FFFFFF";
+  const homeIcon =
+    defaultMode === "dark" ? (
+      <HomeOutlinedIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <HomeIcon sx={{ fontSize: 26 }} />
+    );
+  const postIcon =
+    defaultMode === "dark" ? (
+      <AddCircleOutlineIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <AddCircleIcon sx={{ fontSize: 26 }} />
+    );
+  const profileIcon =
+    defaultMode === "dark" ? (
+      <AccountCircleOutlinedIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <AccountCircleIcon sx={{ fontSize: 26 }} />
+    );
+  const messageIcon =
+    defaultMode === "dark" ? (
+      <MessageOutlinedIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <MessageIcon sx={{ fontSize: 26 }} />
+    );
+  const logOutIcon =
+    defaultMode === "dark" ? (
+      <LogoutOutlinedIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <LogoutIcon sx={{ fontSize: 26 }} />
+    );
+  const homepageIcon =
+    defaultMode === "dark" ? (
+      <HomeOutlinedIcon sx={{ fontSize: 26 }} />
+    ) : (
+      <HomeIcon sx={{ fontSize: 26 }} />
+    );
 
   const modal = (
     <Modal open={logOutModalOpen} onClose={handleClose}>
       <Box sx={style}>
-        <h3 style={{ marginLeft: 30 }}>Are you sure you want to Logout?</h3>
+        <Typography variant="h4" sx={{ ml: 3 }}>
+          Are you sure you want to Logout?
+        </Typography>
         <Box sx={{ display: "flex", justifyContent: "space-around", mt: 3 }}>
           <Button variant="contained" onClick={handleClose} color="error">
-            Cancel
+            <Typography>Cancel</Typography>
           </Button>
           <Button variant="contained" color="success" onClick={logoutHandler}>
-            Confirm
+            <Typography>Confirm</Typography>
           </Button>
         </Box>
       </Box>
@@ -95,51 +142,63 @@ export default function SideBar() {
   return (
     <div id="app">
       {modal}
-      <Sidebar breakPoint="xm">
+      <Sidebar
+        breakPoint="xm"
+        style={{
+          borderRadius: 7,
+          boxShadow:
+            "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
+        }}
+      >
         <Menu style={{ height: "100vh", backgroundColor: bcSidebar }}>
           <MenuItem
-            icon={<MenuOutlinedIcon />}
+            icon={<MenuOutlinedIcon sx={{ fontSize: 30 }} />}
             onClick={() => collapseSidebar()}
-            style={{ textAlign: "center", marginBottom: 40, marginTop: 40 }}
+            style={{ textAlign: "center", marginBottom: 70, marginTop: 60 }}
           >
-            <h2>Societal Verse</h2>
+            <Typography variant="h3">Societal Verse</Typography>
           </MenuItem>
           <MenuItem
             onClick={() => Router.push("/homepage")}
-            icon={<HomeIcon />}
+            icon={homeIcon}
             className={"menuItem"}
+            style={{ marginBottom: 10 }}
           >
-            Home
+            <Typography variant="h5">Home</Typography>
           </MenuItem>
           <MenuItem
-            icon={<AddCircleIcon />}
+            icon={postIcon}
             onClick={() => Router.push("/homepage/post")}
             className="menuItem"
+            style={{ marginBottom: 10 }}
           >
-            Create
+            <Typography variant="h5">Create</Typography>
           </MenuItem>
           <MenuItem
             onClick={() => Router.push("/homepage/profile")}
-            icon={<AccountCircleIcon />}
+            icon={profileIcon}
             className="menuItem"
+            style={{ marginBottom: 10 }}
           >
-            Profile
+            <Typography variant="h5">Profile</Typography>
           </MenuItem>
           <MenuItem
             onClick={() => Router.push("/homepage/message")}
-            icon={<MessageIcon />}
+            icon={messageIcon}
             className="menuItem"
+            style={{ marginBottom: 10 }}
           >
-            Message
+            <Typography variant="h5">Message</Typography>
           </MenuItem>
           <MenuItem
             onClick={() => setLogoutModalOpen(true)}
-            icon={<LogoutIcon />}
+            icon={logOutIcon}
             className="menuItem"
+            style={{ marginBottom: 10 }}
           >
-            Logout
+            <Typography variant="h5">Logout</Typography>
           </MenuItem>
-          <MenuItem
+          {/* <MenuItem
             icon={
               <IconButton onClick={modeHandler} color="inherit">
                 {modeIcon}
@@ -147,8 +206,12 @@ export default function SideBar() {
             }
             style={{ marginTop: 50 }}
           >
-            {defaultMode === "dark" ? "Light Mode" : "Dark Mode"}
-          </MenuItem>
+            {defaultMode === "dark" ? (
+              <Typography variant="h5">Light mode</Typography>
+            ) : (
+              <Typography variant="h5">Dark mode</Typography>
+            )}
+          </MenuItem> */}
         </Menu>
       </Sidebar>
     </div>

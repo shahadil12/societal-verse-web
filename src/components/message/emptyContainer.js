@@ -1,4 +1,5 @@
 import MapsUgcIcon from "@mui/icons-material/MapsUgc";
+import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 
 const EmptyContainer = () => {
@@ -21,7 +22,7 @@ const EmptyContainer = () => {
           mb: 1,
         }}
       />
-      <h3>Send private photos and messages to a friend.</h3>
+      <Typography variant="h3">Send private messages to a friend.</Typography>
     </Box>
   );
 };

@@ -8,7 +8,7 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import SendIcon from "@mui/icons-material/Send";
-import { Avatar, Divider, IconButton, Box } from "@mui/material";
+import { Avatar, Divider, IconButton, Box, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
@@ -28,62 +28,30 @@ const socket = io("http://localhost:5000", {
   auth: {},
 });
 
-const MessageContainer = (props) => {
+export default function MessageContainer(props) {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
   const [reciverSocketId, setReciverSocketId] = useState({});
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [messages, setMessages] = useState([]);
 
-  console.log(messages);
-  console.log(reciverSocketId);
+  console.log(props.messages);
 
   useEffect(() => {
-    const sessionId = async () => {
-      try {
-        const response = await client.post(
-          "/user/sessionId",
-          {
-            userId: props.userProfile.user_id,
-          },
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log(response);
-        if (response.data.session) {
-          socket.auth = { sessionId: response.data.session.id };
-        }
-        if (!response.data.session) {
-          socket.auth = { userId: props?.userProfile?.user_id };
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    sessionId();
-    socket.connect();
+    if (!props) return;
+    if (props.sessionId) {
+      socket.auth = { sessionId: props.sessionId };
+      socket.connect();
+    }
+    if (props.sessionId === "") {
+      socket.auth = { userId: props.userProfile.user_id };
+      socket.connect();
+    }
 
-    socket.on("connect", () => {
-      setIsConnected(true);
-    });
-
-    socket.on("disconnect", () => {
-      setIsConnected(false);
-    });
-
-    socket.on("connetion_error", (err) => {
+    socket.on("connection_error", (err) => {
       console.log(err.message);
     });
 
     socket.on("private_message", ({ message, from }) => {
-      console.log("hii");
-      setMessages((prevState) => {
-        return [...prevState, { message, fromSelf: false, from }];
-      });
+      props.setMessages({ message, fromSelf: false, from });
     });
 
     socket.on("users", (users) => {
@@ -100,18 +68,15 @@ const MessageContainer = (props) => {
     });
 
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
       socket.off("connection_error");
+      socket.off("users");
       socket.off("session");
       socket.off("private_message");
     };
-  }, []);
+  }, [props]);
 
   const messageHandler = (message) => {
-    setMessages((prevState) => {
-      return [...prevState, { message, fromSelf: true }];
-    });
+    props.setMessages({ message, fromSelf: true });
     socket.emit("private_message", {
       message,
       to: reciverSocketId.socket_id,
@@ -121,33 +86,42 @@ const MessageContainer = (props) => {
   };
 
   return (
-    <Card>
+    <Card sx={{ width: "100%", borderRadius: 4 }}>
       <CardHeader
         avatar={
           <Avatar
             src={`data:image/jpeg;base64,${props?.profile?.profile_picture}`}
+            sx={{
+              width: 40,
+              height: 40,
+              border: 1,
+              borderColor: "#E2E2E2",
+            }}
           />
         }
-        title={props?.profile.user_name}
+        title={<Typography variant="h5">{props?.profile.user_name}</Typography>}
       ></CardHeader>
       <Divider />
-      <CardContent>
-        <ChatMsg
-          avatar={""}
-          messages={[
-            "Hi Jenny, How r u today?",
-            "Did you train yesterday",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Volutpat lacus laoreet non curabitur gravida.",
-          ]}
-        />
-        <ChatMsg
-          side={"right"}
-          messages={[
-            "Great! What's about you?",
-            "Of course I did. Speaking of which check this out",
-          ]}
-        />
-        <ChatMsg avatar={""} messages={["Im good.", "See u later."]} />
+      <CardContent sx={{ height: "380px" }}>
+        {props.messages.map((message) => {
+          return (
+            <ChatMsg
+              avatar={
+                message?.sender_id === props?.profile.user_id ||
+                message?.receiver_id === props?.profile?.user_id
+                  ? `data:image/jpeg;base64,${props?.profile?.profile_picture}`
+                  : ""
+              }
+              side={
+                message?.sender_id === props?.userProfile.user_id ||
+                message?.fromSelf
+                  ? "right"
+                  : ""
+              }
+              messages={[message.message]}
+            />
+          );
+        })}
       </CardContent>
       <FormControl fullWidth variant="filled" sx={{ mt: 5 }}>
         <InputLabel>
@@ -162,6 +136,7 @@ const MessageContainer = (props) => {
           }}
         >
           <FilledInput
+            sx={{ width: "100%" }}
             name="message"
             startAdornment={
               <InputAdornment position="start">
@@ -180,6 +155,4 @@ const MessageContainer = (props) => {
       </FormControl>
     </Card>
   );
-};
-
-export default MessageContainer;
+}

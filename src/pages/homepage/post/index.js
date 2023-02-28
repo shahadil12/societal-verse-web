@@ -12,6 +12,7 @@ import {
   Button,
   Divider,
   Modal,
+  Typography,
 } from "@mui/material";
 import ImageUploading from "react-images-uploading";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -30,8 +31,9 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
+  border: "1px solid #E2E2E2",
+  boxShadow:
+    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
   p: 2,
 };
 
@@ -122,7 +124,9 @@ const CreatePost = (props) => {
           }}
         >
           <CheckCircleIcon sx={{ fontSize: 70 }} />
-          <h3 style={{ marginLeft: 30 }}>Post Uploaded Successfully.</h3>
+          <Typography variant="h4" sx={{ ml: 4 }}>
+            Post Uploaded Successfully.
+          </Typography>
         </Box>
       </Box>
     </Modal>
@@ -141,7 +145,7 @@ const CreatePost = (props) => {
           onChange={imageUploadHandler}
           maxNumber={maxNumber}
           dataURLKey="data_url"
-          acceptType={["jpg", "png", "jpeg"]}
+          acceptType={["jpeg"]}
         >
           {({
             imageList,
@@ -160,10 +164,23 @@ const CreatePost = (props) => {
                     alignContent: "center",
                     marginTop: 16,
                     marginLeft: 32,
+                    borderRadius: 4,
+                    border: 1,
+                    borderColor: "#E2E2E2",
+                    boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "translateY(2px)",
+                      boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                    },
                   }}
                 >
                   <CardHeader
-                    title={<h3 style={{ marginLeft: 130 }}>Create New Post</h3>}
+                    title={
+                      <Typography sx={{ ml: 16 }} variant="h4">
+                        Create New Post
+                      </Typography>
+                    }
                   ></CardHeader>
                   <Divider />
                   <CardContent>
@@ -186,7 +203,9 @@ const CreatePost = (props) => {
                         }}
                       />
                       <Button variant="contained" onClick={onImageUpload}>
-                        Click Here To Upload Picture from Your Device
+                        <Typography>
+                          Click Here To Upload Picture from Your Device
+                        </Typography>
                       </Button>
                     </Box>
                   </CardContent>
@@ -199,8 +218,17 @@ const CreatePost = (props) => {
                       display: "flex",
                       justifyContent: "center",
                       alignContent: "center",
-                      marginTop: 11,
+                      marginTop: 9,
                       marginLeft: 17,
+                      borderRadius: 5,
+                      border: 1,
+                      borderColor: "#E2E2E2",
+                      boxShadow: "0px 14px 80px rgba(34, 35, 58, 0.2)",
+                      transition: "0.3s",
+                      "&:hover": {
+                        transform: "translateY(2px)",
+                        boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                      },
                     }}
                   >
                     <Box
@@ -215,10 +243,11 @@ const CreatePost = (props) => {
                         avatar={
                           <Avatar
                             src={`data:image/jpeg;base64,${profile.profile_picture}`}
+                            sx={{ border: 1, borderColor: "#E2E2E2" }}
                           ></Avatar>
                         }
                         title={profile.user_name}
-                        sx={{ borderBottom: 1 }}
+                        sx={{ borderBottom: 2, borderColor: "#E2E2E2" }}
                       ></CardHeader>
                       <Box
                         sx={{
@@ -227,10 +256,10 @@ const CreatePost = (props) => {
                         }}
                       >
                         <Button variant="contained" onClick={onImageUpdate}>
-                          Update
+                          <Typography>Upload</Typography>
                         </Button>
                         <Button variant="contained" onClick={onImageRemoveAll}>
-                          Delete
+                          <Typography>Delete</Typography>
                         </Button>
                       </Box>
                       <Box
@@ -256,7 +285,7 @@ const CreatePost = (props) => {
                         />
                         {hasServerError && (
                           <Alert variant="filled" severity="warning">
-                            <h3>{serverErrorMessage}</h3>
+                            <Typography>{serverErrorMessage}</Typography>
                           </Alert>
                         )}
                         <Button
@@ -266,14 +295,19 @@ const CreatePost = (props) => {
                           disabled={!formIsValid}
                           sx={{ mt: 2 }}
                         >
-                          Upload
+                          <Typography>Upload</Typography>
                         </Button>
                       </Box>
                     </Box>
                     <Box
                       width={500}
                       height={500}
-                      sx={{ m: 1, borderLeft: 1, pl: 3 }}
+                      sx={{
+                        m: 1,
+                        borderLeft: 1,
+                        borderColor: "#E2E2E2",
+                        pl: 3,
+                      }}
                     >
                       <CardMedia
                         component="img"
@@ -283,6 +317,9 @@ const CreatePost = (props) => {
                           width: 450,
                           mb: 1,
                           mt: 3,
+                          border: 1,
+                          borderRadius: 3,
+                          borderColor: "#E2E2E2",
                         }}
                       />
                     </Box>
