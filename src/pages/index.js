@@ -86,13 +86,14 @@ export default function loginPage() {
             Authorization: `Bearer ${loginResponse.data.token}`,
           },
         });
-        console.log(profileResponse);
         if (profileResponse.data.success) {
           setHasProfile(true);
           dispatch(userActions.setProfile(profileResponse.data));
+          Router.push("/homepage");
+          return;
         }
-        hasProfile ? Router.push("/homepage") : Router.push("/profile");
       }
+      Router.push("/profile");
 
       // setHasServerError(false);
       enteredEmailReset();

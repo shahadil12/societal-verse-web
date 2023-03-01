@@ -60,6 +60,7 @@ function a11yProps(index) {
 export default function Profile() {
   const Router = useRouter();
   const token = useSelector((state) => state.auth.token);
+  if (!token) Router.push("/");
   const userId = useSelector((state) => state.user.profile.user_id);
   const [posts, setPosts] = useState([]);
   const [value, setValue] = useState(0);
@@ -220,7 +221,6 @@ export default function Profile() {
                 display: "flex",
                 justifyContent: "center",
                 mt: 1,
-                ml: 25,
               }}
             >
               <TabPanel value={value} index={0}>

@@ -36,6 +36,11 @@ export default function Post(props) {
     posts[postIndex]?.isUserLikedPost
   );
   const likeHandler = (likedChanged) => setLikeChanged(likedChanged);
+  const commentChangedHandler = () => {
+    setCommentChanged((prevState) => {
+      return setCommentChanged(!prevState);
+    });
+  };
   const [commentChanged, setCommentChanged] = useState(false);
   const {
     value: enteredComment,
@@ -120,8 +125,8 @@ export default function Post(props) {
       <FullPost
         post={posts[postIndex]}
         open={logOutModalOpen}
-        commentHandler={commentSubmitHandler}
         commentDeleteHandler={commentDeleteHandler}
+        commentChanged={commentChangedHandler}
         close={handleClose}
       />
       {posts.map((post, i) => {

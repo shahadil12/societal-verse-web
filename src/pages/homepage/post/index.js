@@ -43,6 +43,7 @@ const isValidCaption = /^.{1,500}$/;
 const CreatePost = (props) => {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
+  if (!token) router.push("/");
   const profile = useSelector((state) => state.user.profile);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");

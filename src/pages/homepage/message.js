@@ -12,9 +12,12 @@ import client from "../../utils/api";
 import EmptyContainer from "../../components/message/emptyContainer";
 import MessageContainer from "../../components/message/messageContainer";
 import useSWR from "swr";
+import { useRouter } from "next/router";
 
 export default function Inbox() {
+  const router = useRouter();
   const token = useSelector((state) => state.auth.token);
+  if (!token) router.push("/");
   const [followingProfile, setFollowingProfile] = useState([]);
   const [isEmptyContainer, setIsEmptyContainer] = useState(true);
   const [index, setIndex] = useState(0);

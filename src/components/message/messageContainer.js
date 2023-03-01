@@ -7,6 +7,7 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import SendIcon from "@mui/icons-material/Send";
+import { useRef } from "react";
 import {
   Avatar,
   Divider,
@@ -19,7 +20,6 @@ import {
   ListItemText,
   Grid,
 } from "@mui/material";
-import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { useDispatch } from "react-redux";
@@ -39,10 +39,15 @@ const socket = io("http://localhost:5000", {
 
 export default function MessageContainer(props) {
   const dispatch = useDispatch();
+  const bottomRef = useRef(null);
   const [reciverSocketId, setReciverSocketId] = useState({});
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    console.log(props);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [props.messages]);
+
+  useEffect(() => {
     if (props.sessionId || props.storeSessionId) {
       socket.auth = { sessionId: props.sessionId || props.storeSessionId };
       socket.connect();
@@ -89,6 +94,7 @@ export default function MessageContainer(props) {
       toId: props.profile.user_id,
       from: props.userProfile.user_id,
     });
+    setMessage("");
   };
 
   return (
@@ -105,7 +111,9 @@ export default function MessageContainer(props) {
             }}
           />
         }
-        title={<Typography variant="h5">{props?.profile.user_name}</Typography>}
+        title={
+          <Typography variant="h5">{props?.profile?.user_name}</Typography>
+        }
       ></CardHeader>
       <Divider />
       <CardContent sx={{ height: "380px", overflowY: "scroll" }}>
@@ -129,6 +137,7 @@ export default function MessageContainer(props) {
               </ListItem>
             );
           })}
+          <div ref={bottomRef} />
         </List>
       </CardContent>
       <FormControl fullWidth variant="filled" sx={{ mt: 5 }}>
@@ -145,6 +154,7 @@ export default function MessageContainer(props) {
         >
           <FilledInput
             sx={{ width: "100%" }}
+            value={message}
             name="message"
             startAdornment={
               <InputAdornment position="start">

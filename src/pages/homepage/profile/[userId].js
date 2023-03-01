@@ -1,7 +1,6 @@
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import SideBar from "../../../components/ui/SideBar";
-import Brightness5Icon from "@mui/icons-material/Brightness5";
 import { Grid, Avatar } from "@mui/material";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
@@ -30,18 +29,10 @@ function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+    <div role="tabpanel" {...other}>
+      <Box sx={{ p: 3 }}>
+        <Typography>{children}</Typography>
+      </Box>
     </div>
   );
 }
@@ -50,6 +41,7 @@ export default function Profile() {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const token = useSelector((state) => state.auth.token);
+  if (!token) router.push("/");
   const [posts, setPosts] = useState([]);
   const [value, setValue] = useState(0);
   const [postIndex, setPostIndex] = useState(0);
@@ -68,9 +60,9 @@ export default function Profile() {
         const response = await client.get(`/profile/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (response.data.success) {
           setProfile(response.data);
+          setIsFollowing(response.data.isUserFollowing);
         }
       } catch (error) {
         console.log(error);
@@ -102,7 +94,7 @@ export default function Profile() {
       }
     };
     posts();
-  }, [userId]);
+  }, [userId, isFollowing]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -126,7 +118,6 @@ export default function Profile() {
         );
         if (response.data.success) {
           setIsFollowing(true);
-          router.reload();
         }
       }
 
@@ -138,7 +129,6 @@ export default function Profile() {
         });
         if (response.data.success) {
           setIsFollowing(false);
-          router.reload();
         }
       }
     } catch (error) {

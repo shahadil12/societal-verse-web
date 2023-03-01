@@ -6,14 +6,13 @@ import FormLabel from "@mui/material/FormLabel";
 
 const SelectGender = (props) => {
   const genderChangeHandler = (event) => {
-    props.isValid(true);
     props.value(event.target.value);
   };
 
   return (
     <FormControl>
       <FormLabel>Gender *</FormLabel>
-      <RadioGroup row onChange={genderChangeHandler}>
+      <RadioGroup row onChange={genderChangeHandler} defaultValue={props.value}>
         <FormControlLabel value="FEMALE" control={<Radio />} label="Female" />
         <FormControlLabel value="MALE" control={<Radio />} label="Male" />
         <FormControlLabel value="OTHER" control={<Radio />} label="Other" />

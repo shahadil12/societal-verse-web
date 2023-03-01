@@ -45,7 +45,7 @@ const SuggestionList = () => {
       subheader={
         <ListSubheader sx={{ borderBottom: 1, borderColor: "#E0E0E0" }}>
           <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>
-            Who to follow
+            Suggested Profile
           </Typography>
         </ListSubheader>
       }
@@ -57,17 +57,17 @@ const SuggestionList = () => {
               <ListItemAvatar>
                 <Avatar
                   src={`data:image/jpeg;base64,${profile.thumbnail_profile_picture}`}
+                  sx={{ height: 50, width: 50 }}
                 />
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Typography variant="h6">{profile.user_name}</Typography>
+                  <Typography sx={{ ml: 2 }} variant="h5">
+                    {profile.user_name}
+                  </Typography>
                 }
-                sx={{ mr: 10, mt: 2 }}
+                sx={{ mr: 10, mt: 3 }}
               />
-              <Button variant="outlined" sx={{ fontSize: 13, mt: 1.2 }}>
-                <Typography>Follow</Typography>
-              </Button>
             </ListItem>
           </>
         );

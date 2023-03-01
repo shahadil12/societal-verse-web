@@ -29,6 +29,8 @@ const isValidBio = /^.{0,500}$/;
 export default function profileSetupPage() {
   useUser({ redirectTo: "/homepage", redirectIfFound: true });
   const Router = useRouter();
+  const profile = useSelector((state) => state.user.profile);
+  if (profile) Router.push("/homepage");
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
   const [enteredGender, setEnteredGender] = useState("");

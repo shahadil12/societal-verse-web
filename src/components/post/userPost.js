@@ -44,7 +44,7 @@ const UserPost = (props) => {
       const response = await client.delete(`/post/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (response.data.success) Router.push("/homepage/profile");
+      if (response.data.success) Router.reload();
     } catch (error) {
       console.log(error);
     }

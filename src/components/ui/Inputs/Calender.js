@@ -10,8 +10,8 @@ const isValidAge = dayjs("2010-01-01T00:00:00.000");
 const Calender = (props) => {
   const [dateValue, setDateValue] = useState(isValidAge);
   const dataChangeHandler = (newDateValue) => {
-    setDateValue(newDateValue);
-    props.value(newDateValue);
+    setDateValue(dayjs(newDateValue));
+    props.value(dayjs(newDateValue));
   };
 
   return (

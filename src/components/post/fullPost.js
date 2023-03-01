@@ -19,7 +19,7 @@ import { Modal, Box, Divider, Avatar, Typography, Button } from "@mui/material";
 import client from "../../utils/api";
 import { useRouter } from "next/router";
 import Like from "./like";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { borderColor } from "@mui/system";
 
 const style = {
@@ -35,7 +35,39 @@ const style = {
 };
 
 const FullPost = (props) => {
+  const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.user.profile);
+  const [comment, setComment] = useState("");
+
+  const commentValueHandler = (event) => {
+    setComment(event.target.value);
+  };
+
+  const commentSubmitHandler = async (event) => {
+    try {
+      event.preventDefault();
+      const postId = event.target.postId.value;
+      const createComment = await client.post(
+        `/post/comment/${postId}`,
+        {
+          comment: comment,
+        },
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(createComment);
+      if (createComment.data.success) {
+        setComment("");
+        props.commentChanged();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Modal open={props.open} onClose={props.close} sx={{ transition: "0.5s" }}>
@@ -128,35 +160,32 @@ const FullPost = (props) => {
                 </Typography>
               </CardActions>
               <Typography sx={{ ml: 2 }}>28 MINUTES AGO</Typography>
-              <FormControl
-                fullWidth
-                variant="filled"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  props.commentHandler(e);
-                }}
-              >
-                <InputLabel>Comment</InputLabel>
-                <FilledInput
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <TagFacesIcon />
-                    </InputAdornment>
-                  }
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton type="submit">
-                        <SendIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-                <input
-                  name="postId"
-                  value={props.post?.post?.id}
-                  type="hidden"
-                />
-              </FormControl>
+              <Box component="form" noValidate onSubmit={commentSubmitHandler}>
+                <FormControl fullWidth variant="filled">
+                  <InputLabel>Comment</InputLabel>
+                  <FilledInput
+                    value={comment}
+                    onChange={commentValueHandler}
+                    startAdornment={
+                      <InputAdornment position="start">
+                        <TagFacesIcon />
+                      </InputAdornment>
+                    }
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton type="submit">
+                          <SendIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                  />
+                  <input
+                    name="postId"
+                    value={props.post?.post?.id}
+                    type="hidden"
+                  />
+                </FormControl>
+              </Box>
             </Box>
           </Box>
           <Box width={500} height={500} sx={{ maxHeight: 500, maxWidth: 500 }}>

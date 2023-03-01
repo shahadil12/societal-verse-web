@@ -4,8 +4,14 @@ import Post from "../../components/post/Post";
 import Grid from "@mui/material/Grid";
 import SuggestionList from "../../components/ui/SuggestionList";
 import SearchBar from "../../components/ui/Inputs/SearchBar";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
 
 export default function HomePage() {
+  const router = useRouter();
+  const token = useSelector((state) => state.auth.token);
+  if (!token) router.push("/");
+
   return (
     <Grid container>
       <Grid item xm={5}>

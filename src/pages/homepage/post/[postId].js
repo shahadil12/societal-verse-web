@@ -40,6 +40,7 @@ const EditPost = () => {
   const router = useRouter();
   const postId = router.query.postId;
   const token = useSelector((state) => state.auth.token);
+  if (!token) router.push("/");
   const profile = useSelector((state) => state.user.profile);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");
@@ -47,6 +48,10 @@ const EditPost = () => {
   const [picture, setPicture] = useState("");
   const [postUploadedModalOpen, setPostUploadedModalOpen] = useState(false);
   const [caption, setCaption] = useState("");
+
+  const captionChangeHandler = (event) => {
+    setCaption(event.target.value);
+  };
 
   useEffect(() => {
     const post = async () => {
@@ -151,7 +156,7 @@ const EditPost = () => {
           onChange={imageUploadHandler}
           maxNumber={maxNumber}
           dataURLKey="data_url"
-          acceptType={["jpg", "png", "jpeg"]}
+          acceptType={["jpeg"]}
         >
           {({ imageList, onImageUpdate, errors }) => (
             <>
@@ -212,6 +217,7 @@ const EditPost = () => {
                         label="Caption"
                         multiline
                         rows={12}
+                        onChange={captionChangeHandler}
                         value={caption}
                         sx={{ mb: 1 }}
                       />

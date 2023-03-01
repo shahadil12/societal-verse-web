@@ -13,12 +13,13 @@ import useInput from "../../../hooks/useInput";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
-import { userActions } from "../../../store/authReducer";
+import { userActions } from "../../../store/userReducer";
 import Calender from "../../../components/ui/Inputs/Calender";
 import Copyright from "../../../components/ui/Copyright";
 import SelectGender from "../../../components/ui/Inputs/SelectGender";
 import ImageUploading from "react-images-uploading";
 import client from "../../../utils/api";
+import useSWR from "swr";
 
 const maxNumber = 1;
 
@@ -28,19 +29,18 @@ const isValidBio = /^.{0,500}$/;
 
 export default function profileSetupPage() {
   const Router = useRouter();
-  const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
+  if (!token) Router.push("/");
   const profile = useSelector((state) => state.user.profile);
+  const dispatch = useDispatch();
   const [enteredGender, setEnteredGender] = useState("");
-  const [image, setImage] = useState([]);
   const [enteredProfilePicture, setEnteredProfilePicture] = useState("");
+  const [image, setImage] = useState([]);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");
-  const [enteredDate, setDateValue] = useState(
-    dayjs("2010-01-01T00:00:00.000")
-  );
+  const [enteredDate, setDateValue] = useState(dayjs());
   const genderValue = (gender) => setEnteredGender(gender);
-  const dateValue = (date) => setGenderIsValid(date);
+  const dateValue = (date) => setDateValue(date);
   const imageUploadHandler = (imageList) => {
     setImage(imageList);
     if (imageList.length > 0) {
@@ -81,11 +81,11 @@ export default function profileSetupPage() {
   } = useInput((value) => value.match(isValidBio));
 
   useEffect(() => {
-    setDateValue(`${profile.dob}T00:00:00.841Z`);
-    setEnteredGender(profile.gender);
     setImage([
       { data_url: `data:image/jpeg;base64,${profile.profile_picture}` },
     ]);
+    setDateValue(dayjs(`${profile.dob}T00:00:00.841Z`));
+    setEnteredGender(profile.gender);
     setEnteredProfilePicture(profile.profile_picture);
     setEnteredFirstName(profile.first_name);
     setEnteredLastName(profile.last_name);
@@ -119,17 +119,17 @@ export default function profileSetupPage() {
       );
 
       console.log(profileUpdationResponse);
-      if (profileCreationResponse.data.error) {
+      if (profileUpdationResponse.data.error) {
         setHasServerError(true);
         setServerErrorMessage(profileUpdationResponse.data.error);
       }
 
       if (profileUpdationResponse.data.success) {
-        dispatch(userActions.setProfile(profileResponse.data.profile));
         Router.push("/homepage/profile");
       }
     } catch (error) {
       setHasServerError(true);
+      console.log(error);
       if (error?.response?.data?.error) {
         setServerErrorMessage(error.response.data.error);
       }
