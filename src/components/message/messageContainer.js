@@ -3,18 +3,27 @@ import InputLabel from "@mui/material/InputLabel";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
-import ChatMsg from "@mui-treasury/components/chatMsg/ChatMsg";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import SendIcon from "@mui/icons-material/Send";
-import { Avatar, Divider, IconButton, Box, Typography } from "@mui/material";
+import {
+  Avatar,
+  Divider,
+  IconButton,
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Grid,
+} from "@mui/material";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { useDispatch } from "react-redux";
 import { userActions } from "../../store/userReducer";
-import client from "../../utils/api";
 
 const socket = io("http://localhost:5000", {
   reconnectionDelay: 1000,
@@ -30,22 +39,18 @@ const socket = io("http://localhost:5000", {
 
 export default function MessageContainer(props) {
   const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth.token);
   const [reciverSocketId, setReciverSocketId] = useState({});
 
-  console.log(props.messages);
-
   useEffect(() => {
-    if (!props) return;
-    if (props.sessionId) {
-      socket.auth = { sessionId: props.sessionId };
+    console.log(props);
+    if (props.sessionId || props.storeSessionId) {
+      socket.auth = { sessionId: props.sessionId || props.storeSessionId };
       socket.connect();
     }
-    if (props.sessionId === "") {
+    if (!props.sessionId) {
       socket.auth = { userId: props.userProfile.user_id };
       socket.connect();
     }
-
     socket.on("connection_error", (err) => {
       console.log(err.message);
     });
@@ -58,11 +63,12 @@ export default function MessageContainer(props) {
       const socketId = users.filter((user) => {
         return user.user_id === props.profile.user_id;
       });
+      dispatch(userActions.setReceiverSocketId(socketId[0]));
       setReciverSocketId(socketId[0]);
     });
 
     socket.on("session", ({ sessionId, userId }) => {
-      socket.auth = { sessionId };
+      socket.auth = { sessionId: props.sessionId || props.storeSessionId };
       dispatch(userActions.setSessionId(sessionId));
       socket.userId = userId;
     });
@@ -73,13 +79,13 @@ export default function MessageContainer(props) {
       socket.off("session");
       socket.off("private_message");
     };
-  }, [props]);
+  }, []);
 
   const messageHandler = (message) => {
     props.setMessages({ message, fromSelf: true });
     socket.emit("private_message", {
       message,
-      to: reciverSocketId.socket_id,
+      to: reciverSocketId.socket_id || props.storeReceiverId,
       toId: props.profile.user_id,
       from: props.userProfile.user_id,
     });
@@ -102,26 +108,28 @@ export default function MessageContainer(props) {
         title={<Typography variant="h5">{props?.profile.user_name}</Typography>}
       ></CardHeader>
       <Divider />
-      <CardContent sx={{ height: "380px" }}>
-        {props.messages.map((message) => {
-          return (
-            <ChatMsg
-              avatar={
-                message?.sender_id === props?.profile.user_id ||
-                message?.receiver_id === props?.profile?.user_id
-                  ? `data:image/jpeg;base64,${props?.profile?.profile_picture}`
-                  : ""
-              }
-              side={
-                message?.sender_id === props?.userProfile.user_id ||
-                message?.fromSelf
-                  ? "right"
-                  : ""
-              }
-              messages={[message.message]}
-            />
-          );
-        })}
+      <CardContent sx={{ height: "380px", overflowY: "scroll" }}>
+        <List>
+          {props.messages.map((message, i) => {
+            return (
+              <ListItem key={i}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <ListItemText
+                      align={
+                        message?.sender_id === props.userProfile.user_id ||
+                        message?.fromSelf
+                          ? "right"
+                          : "left"
+                      }
+                      primary={message.message}
+                    ></ListItemText>
+                  </Grid>
+                </Grid>
+              </ListItem>
+            );
+          })}
+        </List>
       </CardContent>
       <FormControl fullWidth variant="filled" sx={{ mt: 5 }}>
         <InputLabel>

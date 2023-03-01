@@ -11,95 +11,87 @@ import { useSelector } from "react-redux";
 import client from "../../utils/api";
 import EmptyContainer from "../../components/message/emptyContainer";
 import MessageContainer from "../../components/message/messageContainer";
+import useSWR from "swr";
 
 export default function Inbox() {
   const token = useSelector((state) => state.auth.token);
-  const [profile, setProfile] = useState({});
   const [followingProfile, setFollowingProfile] = useState([]);
   const [isEmptyContainer, setIsEmptyContainer] = useState(true);
   const [index, setIndex] = useState(0);
   const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState("");
+  const profile = useSelector((state) => state.user.profile);
+  const storeSessionId = useSelector((state) => state.user.sessionId);
+  const storeReceiverSocketId = useSelector(
+    (state) => state.user.receiverSocketId
+  );
+
+  const getMessages = async (url, token) => {
+    try {
+      const response = await client.post(
+        url,
+        {
+          userId: profile.user_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.success) {
+        setMessages(response.data.messages);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getSessionId = async (url, token) => {
+    try {
+      const response = await client.post(
+        url,
+        {
+          userId: profile.user_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSessionId(response.data.session.id);
+    } catch (error) {
+      return error;
+    }
+  };
+  const getFollowingProfile = async (url, token) => {
+    try {
+      const response = await client.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setFollowingProfile(response.data.profiles[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useSWR(["/user/sessionId", token], ([url, token]) => {
+    getSessionId(url, token);
+  });
+  useSWR(["/user/messages", token], ([url, token]) => {
+    getMessages(url, token);
+  });
+  useSWR(["/user/followingProfile", token], ([url, token]) => {
+    getFollowingProfile(url, token);
+  });
 
   const messageHandler = (message) =>
-    setMessages((prevState) => {
-      return [...prevState, message];
-    });
-
-  useEffect(() => {
-    const followingProfile = async () => {
-      try {
-        const response = await client.get("/user/followingProfile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data.success) {
-          setFollowingProfile(response.data.profiles[0]);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    followingProfile();
-
-    const profile = async () => {
-      try {
-        const response = await client.get(`/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data.success) {
-          setProfile(response.data.profile);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    profile();
-    const messages = async () => {
-      try {
-        const response = await client.post(
-          "/user/messages",
-          {
-            userId: props.profile.user_id,
-          },
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.data.success) {
-          setMessages(response.data.messages);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    messages();
-
-    const getSessionId = async () => {
-      try {
-        const response = await client.post(
-          "/user/sessionId",
-          {
-            userId: props.userProfile.user_id,
-          },
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.data.session) {
-          setSessionId(response.data.session.id);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getSessionId();
-  }, []);
+    setMessages((prevState) => [...prevState, message]);
 
   return (
     <Grid container>
@@ -185,9 +177,11 @@ export default function Inbox() {
           <MessageContainer
             profile={followingProfile[index]}
             userProfile={profile}
-            sessionId={sessionId}
             messages={messages}
+            sessionId={sessionId}
             setMessages={messageHandler}
+            storeSessionId={storeSessionId}
+            storeReceiverSocketId={storeReceiverSocketId}
           />
         )}
       </Grid>
