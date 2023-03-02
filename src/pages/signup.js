@@ -27,7 +27,6 @@ const isValidEmail =
 const isValidPassword = /^.{8,16}$/;
 
 export default function SignUpPage() {
-  useUser({ redirectTo: "/homepage", redirectIfFound: true });
   const Router = useRouter();
   const dispatch = useDispatch();
   const [hasServerError, setHasServerError] = useState(false);

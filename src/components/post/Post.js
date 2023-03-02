@@ -134,10 +134,9 @@ export default function Post(props) {
           <>
             <Card
               sx={{
-                maxWidth: 500,
-                ml: 18,
-                mr: 10,
-                mt: 7,
+                maxWidth: 550,
+                width: 550,
+                mt: 8,
                 borderRadius: 2,
                 border: 1,
                 borderColor: "#E0E0E0",
@@ -156,7 +155,12 @@ export default function Post(props) {
                     <IconButton type="submit">
                       <Avatar
                         src={`data:image/jpeg;base64,${post?.userDetail?.thumbnail_profile_picture}`}
-                        sx={{ border: 1, borderColor: "#E0E0E0" }}
+                        sx={{
+                          border: 1,
+                          borderColor: "#E0E0E0",
+                          height: 45,
+                          width: 45,
+                        }}
                       />
                     </IconButton>
                     <input

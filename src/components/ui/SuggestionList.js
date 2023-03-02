@@ -35,7 +35,7 @@ const SuggestionList = () => {
         width: "100%",
         maxWidth: 360,
         bgcolor: "background.paper",
-        mt: 7,
+        mt: 8,
         borderRadius: 2,
         border: 1,
         borderColor: "#E0E0E0",

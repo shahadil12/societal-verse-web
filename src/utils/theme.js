@@ -15,16 +15,12 @@ export const colorCodes = {
     1000: "#000000",
   },
   primary: {
-    50: "#E6FBFF",
-    100: "#CCF7FE",
-    200: "#99EEFD",
-    300: "#66E6FC",
-    400: "#33DDFB",
-    500: "#00D5FA",
-    600: "#00A0BC",
-    700: "#006B7D",
-    800: "#00353F",
-    900: "#001519",
+    50: "#9abcf2",
+    100: "#72a1ed",
+    200: "#538ce9",
+    300: "#306cce",
+    400: "#2d66c3",
+    500: "#2554a0",
   },
 };
 
@@ -38,8 +34,8 @@ export const themeSettings = (mode) => {
             // palette values for dark mode
             primary: {
               dark: colorCodes.primary[200],
-              main: colorCodes.primary[500],
-              light: colorCodes.primary[800],
+              main: colorCodes.primary[300],
+              light: colorCodes.primary[500],
             },
             neutral: {
               dark: colorCodes.grey[100],
@@ -56,9 +52,9 @@ export const themeSettings = (mode) => {
         : {
             // palette values for light mode
             primary: {
-              dark: colorCodes.primary[700],
-              main: colorCodes.primary[500],
-              light: colorCodes.primary[50],
+              dark: colorCodes.primary[500],
+              main: colorCodes.primary[300],
+              light: colorCodes.primary[100],
             },
             neutral: {
               dark: colorCodes.grey[700],

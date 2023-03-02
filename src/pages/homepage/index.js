@@ -3,9 +3,9 @@ import SideBar from "../../components/ui/SideBar";
 import Post from "../../components/post/Post";
 import Grid from "@mui/material/Grid";
 import SuggestionList from "../../components/ui/SuggestionList";
-import SearchBar from "../../components/ui/Inputs/SearchBar";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
+import { Box } from "@mui/system";
 
 export default function HomePage() {
   const router = useRouter();
@@ -13,14 +13,14 @@ export default function HomePage() {
   if (!token) router.push("/");
 
   return (
-    <Grid container>
-      <Grid item xm={5}>
+    <Grid container columnSpacing={11}>
+      <Grid item sx={{ position: "fixed" }}>
         <SideBar />
       </Grid>
-      <Grid item xm={5}>
+      <Grid item sx={{ ml: 45 }}>
         <Post />
       </Grid>
-      <Grid item xm={5}>
+      <Grid item>
         <SuggestionList />
       </Grid>
     </Grid>

@@ -24,7 +24,6 @@ const isValidEmail =
 const isValidPassword = /^.{8,16}$/;
 
 export default function loginPage() {
-  useUser({ redirectTo: "/homepage", redirectIfFound: true });
   const Router = useRouter();
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
@@ -93,7 +92,6 @@ export default function loginPage() {
           return;
         }
       }
-      Router.push("/profile");
 
       // setHasServerError(false);
       enteredEmailReset();

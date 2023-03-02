@@ -5,8 +5,9 @@ const initialUserState = {
   following: 0,
   profile: {},
   sessionId: "",
-  messages: [],
+  followingProfile: [],
   receiverSocketId: "",
+  messageIndex: 0,
 };
 
 const userSlice = createSlice({
@@ -21,11 +22,14 @@ const userSlice = createSlice({
     setSessionId(state, action) {
       state.sessionId = action.payload;
     },
-    setMessages(state, action) {
-      state.messages.push(action.payload);
+    setfollowingProfile(state, action) {
+      state.followingProfile = action.payload;
     },
     setReceiverSocketId(state, action) {
       state.receiverSocketId = action.payload;
+    },
+    setMessageIndex(state, action) {
+      state.messageIndex = action.payload;
     },
   },
 });

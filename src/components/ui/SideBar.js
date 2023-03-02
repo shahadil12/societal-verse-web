@@ -65,7 +65,15 @@ export default function SideBar() {
           "persist:user",
           JSON.stringify({
             auth: { token: "", mode: "light" },
-            user: { followers: 0, following: 0, profile: {} },
+            user: {
+              followers: 0,
+              following: 0,
+              profile: {},
+              sessionId: "",
+              followingProfile: [],
+              receiverSocketId: "",
+              messageIndex: 0,
+            },
           })
         );
 
@@ -140,23 +148,22 @@ export default function SideBar() {
   );
 
   return (
-    <div id="app">
+    <div>
       {modal}
       <Sidebar
         breakPoint="xm"
         style={{
           borderRadius: 7,
+
           boxShadow:
             "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
         }}
       >
         <Menu style={{ height: "100vh", backgroundColor: bcSidebar }}>
           <MenuItem
-            icon={<MenuOutlinedIcon sx={{ fontSize: 30 }} />}
-            onClick={() => collapseSidebar()}
-            style={{ textAlign: "center", marginBottom: 70, marginTop: 60 }}
+            style={{ textAlign: "left", marginBottom: 60, marginTop: 60 }}
           >
-            <Typography variant="h3">Societal Verse</Typography>
+            <Typography variant="h2">Societal Verse</Typography>
           </MenuItem>
           <MenuItem
             onClick={() => Router.push("/homepage")}

@@ -13,43 +13,59 @@ import EmptyContainer from "../../components/message/emptyContainer";
 import MessageContainer from "../../components/message/messageContainer";
 import useSWR from "swr";
 import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { userActions } from "../../store/userReducer";
 
 export default function Inbox() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
   if (!token) router.push("/");
   const [followingProfile, setFollowingProfile] = useState([]);
   const [isEmptyContainer, setIsEmptyContainer] = useState(true);
   const [index, setIndex] = useState(0);
-  const [messages, setMessages] = useState([]);
   const [sessionId, setSessionId] = useState("");
   const profile = useSelector((state) => state.user.profile);
   const storeSessionId = useSelector((state) => state.user.sessionId);
   const storeReceiverSocketId = useSelector(
     (state) => state.user.receiverSocketId
   );
+  const storeFollowingProfile = useSelector(
+    (state) => state.user.followingProfile
+  );
+  const [messages, setMessages] = useState([]);
 
-  const getMessages = async (url, token) => {
-    try {
-      const response = await client.post(
-        url,
-        {
-          userId: profile.user_id,
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.data.success) {
-        setMessages(response.data.messages);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  const messageChangeHandler = (message) => {
+    setMessages((prevState) => {
+      return [...prevState, message];
+    });
   };
+  console.log(storeReceiverSocketId);
+
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        const response = await client.post(
+          "/user/messages",
+          {
+            userId: storeFollowingProfile[index][0]?.user_id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data.success) {
+          setMessages(response.data.messages);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getMessages();
+  }, [index]);
 
   const getSessionId = async (url, token) => {
     try {
@@ -70,13 +86,15 @@ export default function Inbox() {
       return error;
     }
   };
+
   const getFollowingProfile = async (url, token) => {
     try {
       const response = await client.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data.success) {
-        setFollowingProfile(response.data.profiles[0]);
+        dispatch(userActions.setfollowingProfile(response.data.profiles));
+        setFollowingProfile(response.data.profiles);
       }
     } catch (error) {
       console.log(error);
@@ -86,15 +104,10 @@ export default function Inbox() {
   useSWR(["/user/sessionId", token], ([url, token]) => {
     getSessionId(url, token);
   });
-  useSWR(["/user/messages", token], ([url, token]) => {
-    getMessages(url, token);
-  });
+
   useSWR(["/user/followingProfile", token], ([url, token]) => {
     getFollowingProfile(url, token);
   });
-
-  const messageHandler = (message) =>
-    setMessages((prevState) => [...prevState, message]);
 
   return (
     <Grid container>
@@ -150,12 +163,13 @@ export default function Inbox() {
                     onClick={(e) => {
                       e.preventDefault();
                       setIsEmptyContainer(false);
+                      dispatch(userActions.setMessageIndex(i));
                       setIndex(i);
                     }}
                   >
                     <ListItemAvatar>
                       <Avatar
-                        src={`data:image/jpeg;base64,${profile?.profile_picture}`}
+                        src={`data:image/jpeg;base64,${profile[0]?.profile_picture}`}
                         sx={{
                           width: 55,
                           height: 55,
@@ -165,7 +179,7 @@ export default function Inbox() {
                       />
                     </ListItemAvatar>
                     <Typography variant="h5" sx={{ ml: 2 }}>
-                      {profile.user_name}
+                      {profile[0]?.user_name}
                     </Typography>
                   </ListItem>
                   <Divider />
@@ -178,11 +192,11 @@ export default function Inbox() {
           <EmptyContainer />
         ) : (
           <MessageContainer
-            profile={followingProfile[index]}
-            userProfile={profile}
+            profile={followingProfile[index][0]}
             messages={messages}
+            setMessages={messageChangeHandler}
+            userProfile={profile}
             sessionId={sessionId}
-            setMessages={messageHandler}
             storeSessionId={storeSessionId}
             storeReceiverSocketId={storeReceiverSocketId}
           />

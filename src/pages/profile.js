@@ -27,10 +27,8 @@ const isValidUserName = /^[a-zA-Z0-9]{1,20}$/;
 const isValidBio = /^.{0,500}$/;
 
 export default function profileSetupPage() {
-  useUser({ redirectTo: "/homepage", redirectIfFound: true });
   const Router = useRouter();
   const profile = useSelector((state) => state.user.profile);
-  if (profile) Router.push("/homepage");
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
   const [enteredGender, setEnteredGender] = useState("");
@@ -121,15 +119,14 @@ export default function profileSetupPage() {
         }
       );
 
-      console.log(profileCreationResponse);
-      if (profileCreationResponse.data.error) {
-        setHasServerError(true);
-        setServerErrorMessage(profileCreationResponse.data.error);
-      }
-
       if (profileCreationResponse.data.success) {
         dispatch(userActions.setProfile(profileResponse.data));
         Router.push("/homepage");
+      }
+
+      if (profileCreationResponse.data.error) {
+        setHasServerError(true);
+        setServerErrorMessage(profileCreationResponse.data.error);
       }
 
       firstNameReset();

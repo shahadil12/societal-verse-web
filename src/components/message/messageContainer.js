@@ -22,8 +22,9 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../store/userReducer";
+import client from "../../utils/api";
 
 const socket = io("http://localhost:5000", {
   reconnectionDelay: 1000,
@@ -42,39 +43,52 @@ export default function MessageContainer(props) {
   const bottomRef = useRef(null);
   const [reciverSocketId, setReciverSocketId] = useState({});
   const [message, setMessage] = useState("");
+  const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [props.messages]);
+    socket.on("connect", () => {
+      setIsConnected(true);
+    });
 
-  useEffect(() => {
-    if (props.sessionId || props.storeSessionId) {
-      socket.auth = { sessionId: props.sessionId || props.storeSessionId };
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+
+    if (props?.sessionId || props?.storeSessionId) {
+      socket.auth = { sessionId: props?.sessionId || props?.storeSessionId };
       socket.connect();
     }
-    if (!props.sessionId) {
-      socket.auth = { userId: props.userProfile.user_id };
+    if (!props?.sessionId) {
+      socket.auth = { userId: props?.userProfile?.user_id };
       socket.connect();
     }
+
     socket.on("connection_error", (err) => {
       console.log(err.message);
     });
 
+    socket.on("messageResponse", ({ message, from }) => {
+      console.log("hii");
+      props.setMessages({ message, fromSelf: false, from });
+    });
+
     socket.on("private_message", ({ message, from }) => {
+      console.log("hii");
       props.setMessages({ message, fromSelf: false, from });
     });
 
     socket.on("users", (users) => {
       const socketId = users.filter((user) => {
-        return user.user_id === props.profile.user_id;
+        return user.user_id === props?.profile?.user_id;
       });
-      dispatch(userActions.setReceiverSocketId(socketId[0]));
+      dispatch(userActions.setReceiverSocketId(socketId[0].socket_id));
       setReciverSocketId(socketId[0]);
     });
 
     socket.on("session", ({ sessionId, userId }) => {
-      socket.auth = { sessionId: props.sessionId || props.storeSessionId };
+      socket.auth = { sessionId };
       dispatch(userActions.setSessionId(sessionId));
+      console.log(sessionId, userId);
       socket.userId = userId;
     });
 
@@ -83,16 +97,22 @@ export default function MessageContainer(props) {
       socket.off("users");
       socket.off("session");
       socket.off("private_message");
+      socket.off("messageResponse");
     };
   }, []);
 
+  const messageChangeHandler = (event) => {
+    setMessage(event.target.value);
+  };
+
   const messageHandler = (message) => {
     props.setMessages({ message, fromSelf: true });
+    console.log(props?.storeReceiverSocketId);
     socket.emit("private_message", {
       message,
-      to: reciverSocketId.socket_id || props.storeReceiverId,
-      toId: props.profile.user_id,
-      from: props.userProfile.user_id,
+      to: reciverSocketId?.socket_id || props?.storeReceiverSocketId,
+      toId: props?.profile?.user_id,
+      from: props?.userProfile?.user_id,
     });
     setMessage("");
   };
@@ -118,7 +138,7 @@ export default function MessageContainer(props) {
       <Divider />
       <CardContent sx={{ height: "380px", overflowY: "scroll" }}>
         <List>
-          {props.messages.map((message, i) => {
+          {props?.messages.map((message, i) => {
             return (
               <ListItem key={i}>
                 <Grid container>
@@ -155,6 +175,7 @@ export default function MessageContainer(props) {
           <FilledInput
             sx={{ width: "100%" }}
             value={message}
+            onChange={messageChangeHandler}
             name="message"
             startAdornment={
               <InputAdornment position="start">
