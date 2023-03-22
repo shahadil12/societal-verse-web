@@ -7,6 +7,7 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import SendIcon from "@mui/icons-material/Send";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRef } from "react";
 import {
   Avatar,
@@ -24,7 +25,6 @@ import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../../store/userReducer";
-import client from "../../utils/api";
 
 const socket = io("http://localhost:5000", {
   reconnectionDelay: 1000,
@@ -43,7 +43,12 @@ export default function MessageContainer(props) {
   const bottomRef = useRef(null);
   const [reciverSocketId, setReciverSocketId] = useState({});
   const [message, setMessage] = useState("");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [isConnected, setIsConnected] = useState(socket.connected);
+
+  // useEffect(() => {
+  //   lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // }, [props.messages]);
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -68,12 +73,10 @@ export default function MessageContainer(props) {
     });
 
     socket.on("messageResponse", ({ message, from }) => {
-      console.log("hii");
       props.setMessages({ message, fromSelf: false, from });
     });
 
     socket.on("private_message", ({ message, from }) => {
-      console.log("hii");
       props.setMessages({ message, fromSelf: false, from });
     });
 
@@ -81,14 +84,13 @@ export default function MessageContainer(props) {
       const socketId = users.filter((user) => {
         return user.user_id === props?.profile?.user_id;
       });
-      dispatch(userActions.setReceiverSocketId(socketId[0].socket_id));
+      dispatch(userActions.setReceiverSocketId(socketId[0]?.socket_id));
       setReciverSocketId(socketId[0]);
     });
 
     socket.on("session", ({ sessionId, userId }) => {
       socket.auth = { sessionId };
-      dispatch(userActions.setSessionId(sessionId));
-      console.log(sessionId, userId);
+      dispatch(userActions?.setSessionId(sessionId));
       socket.userId = userId;
     });
 
@@ -118,7 +120,7 @@ export default function MessageContainer(props) {
   };
 
   return (
-    <Card sx={{ width: "100%", borderRadius: 4 }}>
+    <Card sx={{ width: "100%", borderRadius: 4, ml: isMobile ? 10 : 0 }}>
       <CardHeader
         avatar={
           <Avatar
@@ -145,12 +147,19 @@ export default function MessageContainer(props) {
                   <Grid item xs={12}>
                     <ListItemText
                       align={
-                        message?.sender_id === props.userProfile.user_id ||
+                        message?.sender_id === props?.userProfile?.user_id ||
                         message?.fromSelf
                           ? "right"
                           : "left"
                       }
                       primary={message.message}
+                      sx={{
+                        color:
+                          message?.sender_id === props?.userProfile?.user_id ||
+                          message?.fromSelf
+                            ? "black"
+                            : "#306cce",
+                      }}
                     ></ListItemText>
                   </Grid>
                 </Grid>

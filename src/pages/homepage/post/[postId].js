@@ -3,6 +3,8 @@ import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
 import { Typography } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
 // import { fileTypeFromBuffer } from "file-type";
 import {
   Grid,
@@ -48,7 +50,7 @@ const EditPost = () => {
   const [picture, setPicture] = useState("");
   const [postUploadedModalOpen, setPostUploadedModalOpen] = useState(false);
   const [caption, setCaption] = useState("");
-
+  const isMobile = useMediaQuery("(max-width:600px)");
   const captionChangeHandler = (event) => {
     setCaption(event.target.value);
   };
@@ -146,7 +148,7 @@ const EditPost = () => {
   return (
     <Grid container>
       {modal}
-      <Grid item>
+      <Grid item sx={{ position: "fixed" }}>
         <SideBar />
       </Grid>
       <Grid item>
@@ -167,7 +169,7 @@ const EditPost = () => {
                     justifyContent: "center",
                     alignContent: "center",
                     marginTop: 10,
-                    marginLeft: 20,
+                    marginLeft: isMobile ? 10 : 55,
                     borderRadius: 4,
                     border: 1,
                     borderColor: "#E2E2E2",
@@ -246,7 +248,7 @@ const EditPost = () => {
                       image={imageList[0]?.data_url}
                       sx={{
                         height: 450,
-                        width: 450,
+                        width: isMobile ? 300 : 450,
                         mb: 1,
                         mt: 3,
                       }}

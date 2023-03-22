@@ -12,6 +12,8 @@ import FullPost from "../../../components/post/fullPost";
 import { Typography } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -47,6 +49,7 @@ export default function Profile() {
   const [postIndex, setPostIndex] = useState(0);
   const [profile, setProfile] = useState({});
   const [isFollowing, setIsFollowing] = useState(false);
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -60,9 +63,9 @@ export default function Profile() {
         const response = await client.get(`/profile/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (response.data.success) {
-          setProfile(response.data);
-          setIsFollowing(response.data.isUserFollowing);
+        if (response?.data?.success) {
+          setProfile(response?.data);
+          setIsFollowing(response?.data?.isUserFollowing);
         }
       } catch (error) {
         console.log(error);
@@ -138,10 +141,10 @@ export default function Profile() {
 
   return (
     <Grid container>
-      <Grid item>
+      <Grid item sx={{ position: "fixed" }}>
         <SideBar />
       </Grid>
-      <Grid item sx={{ display: "flex" }}>
+      <Grid item sx={{ display: "flex", ml: isMobile ? 0 : 30 }}>
         <FullPost
           post={posts[postIndex]}
           open={modalOpen}
@@ -151,12 +154,18 @@ export default function Profile() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: 800,
+            width: isMobile ? 400 : 800,
             mt: 6,
             ml: 16,
           }}
         >
-          <Box sx={{ display: "flex", mb: 5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              mb: 5,
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
@@ -245,15 +254,14 @@ export default function Profile() {
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "center",
+                justifyContent: isMobile ? "" : "center",
                 mt: 1,
-                ml: 30,
               }}
             >
               <TabPanel>
                 <ImageList
-                  sx={{ width: 700, height: 300 }}
-                  cols={3}
+                  sx={{ width: isMobile ? 300 : 700, height: 400, mt: 2 }}
+                  cols={isMobile ? 1 : 2}
                   rowHeight={250}
                 >
                   {posts.map((post, i) => (

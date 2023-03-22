@@ -120,11 +120,20 @@ export default function profileSetupPage() {
       );
 
       if (profileCreationResponse.data.success) {
-        dispatch(userActions.setProfile(profileResponse.data));
-        Router.push("/homepage");
+        const profileResponse = await client.get("/profile", {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (profileResponse.data.success) {
+          dispatch(userActions.setProfile(profileResponse.data));
+          Router.push("/homepage");
+          return;
+        }
       }
 
-      if (profileCreationResponse.data.error) {
+      if (!profileCreationResponse.data.success) {
         setHasServerError(true);
         setServerErrorMessage(profileCreationResponse.data.error);
       }
@@ -256,7 +265,7 @@ export default function profileSetupPage() {
           </Grid>
           <Grid item xs={12}>
             {hasServerError && (
-              <Alert variant="filled" severity="warning">
+              <Alert variant="filled" severity="warning" sx={{ mt: 1 }}>
                 {serverErrorMessage}
               </Alert>
             )}

@@ -15,12 +15,14 @@ import TagFacesIcon from "@mui/icons-material/TagFaces";
 import FullPost from "./fullPost";
 import useInput from "../../hooks/useInput";
 import SendIcon from "@mui/icons-material/Send";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Avatar, Typography, Box, Divider } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import client from "../../utils/api";
 import Like from "./like";
+import dayjs from "dayjs";
 
 const isValidComment = /^.{0,500}$/;
 
@@ -28,6 +30,7 @@ export default function Post(props) {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
   if (!token) router.push("/");
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [posts, setPosts] = useState([]);
   const [postIndex, setPostIndex] = useState(0);
   const [logOutModalOpen, setLogoutModalOpen] = useState(false);
@@ -38,7 +41,7 @@ export default function Post(props) {
   const likeHandler = (likedChanged) => setLikeChanged(likedChanged);
   const commentChangedHandler = () => {
     setCommentChanged((prevState) => {
-      return setCommentChanged(!prevState);
+      return !prevState;
     });
   };
   const [commentChanged, setCommentChanged] = useState(false);
@@ -50,7 +53,6 @@ export default function Post(props) {
     valueBlurHandler: commentBlurHandler,
     reset: enteredCommentReset,
   } = useInput((value) => value.match(isValidComment));
-
   let formIsValid = false;
   if (enteredCommentIsValid) {
     formIsValid = true;
@@ -86,10 +88,10 @@ export default function Post(props) {
         }
       );
       if (createComment.data.success) {
-        enteredCommentReset();
         setCommentChanged((prevState) => {
-          return setCommentChanged(!prevState);
+          return !prevState;
         });
+        enteredCommentReset();
       }
     } catch (error) {
       console.log(error);
@@ -117,8 +119,9 @@ export default function Post(props) {
     router.push(`/homepage/profile/${userId}`);
   };
 
-  // const currentTime = new Date().toLocaleTimeString();
-  // const postUploadTime = new Date(updatedAt).toLocaleTimeString();
+  const postUploadDate = dayjs(posts[postIndex]?.post?.updatedAt)
+    .toString()
+    .split(" ");
 
   return (
     <>
@@ -135,7 +138,7 @@ export default function Post(props) {
             <Card
               sx={{
                 maxWidth: 550,
-                width: 550,
+                width: isMobile ? 365 : 550,
                 mt: 8,
                 borderRadius: 2,
                 border: 1,
@@ -215,7 +218,7 @@ export default function Post(props) {
                 </Typography>
                 <Typography>
                   <br />
-                  28 MINUTES AGO
+                  {`${postUploadDate[0]} ${postUploadDate[1]} ${postUploadDate[2]} ${postUploadDate[3]}`}
                 </Typography>
                 <Box
                   component="form"

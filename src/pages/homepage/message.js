@@ -12,6 +12,7 @@ import client from "../../utils/api";
 import EmptyContainer from "../../components/message/emptyContainer";
 import MessageContainer from "../../components/message/messageContainer";
 import useSWR from "swr";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { userActions } from "../../store/userReducer";
@@ -27,6 +28,7 @@ export default function Inbox() {
   const [sessionId, setSessionId] = useState("");
   const profile = useSelector((state) => state.user.profile);
   const storeSessionId = useSelector((state) => state.user.sessionId);
+  const isMobile = useMediaQuery("(max-width:600px)");
   const storeReceiverSocketId = useSelector(
     (state) => state.user.receiverSocketId
   );
@@ -111,7 +113,7 @@ export default function Inbox() {
 
   return (
     <Grid container>
-      <Grid item>
+      <Grid item sx={{ position: "fixed" }}>
         <SideBar />
       </Grid>
       <Grid
@@ -124,18 +126,18 @@ export default function Inbox() {
           border: 1,
           borderRadius: 4,
           borderColor: "#E2E2E2",
-          ml: 13,
+          ml: isMobile ? 10 : 45,
           mt: 7,
           boxShadow:
             "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
         }}
       >
-        <Box sx={{ display: "flex", width: "250px" }}>
+        <Box sx={{ display: "flex", width: isMobile ? 80 : 250 }}>
           <List
             sx={{
               border: 1,
               borderColor: "#E2E2E2",
-              width: "450px",
+              width: isMobile ? 200 : 450,
               borderRadius: 4,
             }}
             subheader={

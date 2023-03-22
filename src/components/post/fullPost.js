@@ -14,33 +14,38 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import SendIcon from "@mui/icons-material/Send";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useSelector } from "react-redux";
 import { Modal, Box, Divider, Avatar, Typography, Button } from "@mui/material";
 import client from "../../utils/api";
 import { useRouter } from "next/router";
 import Like from "./like";
 import { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import { borderColor } from "@mui/system";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 900,
-  bgcolor: "background.paper",
-  border: "1px solid #E2E2E2",
-  boxShadow:
-    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
-};
 
 const FullPost = (props) => {
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.user.profile);
   const [comment, setComment] = useState("");
-
+  const isMobile = useMediaQuery("(max-width:600px)");
   const commentValueHandler = (event) => {
     setComment(event.target.value);
+  };
+
+  const postUploadDate = dayjs(props?.post?.post?.updatedAt)
+    .toString()
+    .split(" ");
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: isMobile ? 460 : 900,
+    bgcolor: "background.paper",
+    border: "1px solid #E2E2E2",
+    boxShadow:
+      "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
   };
 
   const commentSubmitHandler = async (event) => {
@@ -154,12 +159,15 @@ const FullPost = (props) => {
                   );
                 })}
               </List>
-              <CardActions disableSpacing>
-                <Typography variant="h5" sx={{ ml: 1 }}>
-                  {props?.post?.likes} likes
-                </Typography>
-              </CardActions>
-              <Typography sx={{ ml: 2 }}>28 MINUTES AGO</Typography>
+
+              <Typography variant="h5" sx={{ ml: 1 }}>
+                {props?.post?.likes} likes
+              </Typography>
+
+              <Typography sx={{ ml: 1 }}>
+                <br />
+                {`${postUploadDate[0]} ${postUploadDate[1]} ${postUploadDate[2]} ${postUploadDate[3]}`}
+              </Typography>
               <Box component="form" noValidate onSubmit={commentSubmitHandler}>
                 <FormControl fullWidth variant="filled">
                   <InputLabel>Comment</InputLabel>
@@ -188,13 +196,20 @@ const FullPost = (props) => {
               </Box>
             </Box>
           </Box>
-          <Box width={500} height={500} sx={{ maxHeight: 500, maxWidth: 500 }}>
+          <Box
+            width={isMobile ? 250 : 500}
+            height={500}
+            sx={{
+              maxHeight: 500,
+              maxWidth: isMobile ? 250 : 500,
+            }}
+          >
             <CardMedia
               component="img"
               image={`data:image/jpeg;base64,${props?.post?.post?.picture}`}
               sx={{
                 height: 500,
-                width: 500,
+                width: isMobile ? 250 : 500,
               }}
             />
           </Box>

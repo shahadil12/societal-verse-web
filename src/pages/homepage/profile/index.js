@@ -14,6 +14,7 @@ import client from "../../../utils/api";
 import UserPost from "../../../components/post/userPost";
 import { useRouter } from "next/router";
 import { Typography } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 const style = {
   position: "absolute",
@@ -66,7 +67,7 @@ export default function Profile() {
   const [value, setValue] = useState(0);
   const [postIndex, setPostIndex] = useState(0);
   const [profile, setProfile] = useState({});
-
+  const isMobile = useMediaQuery("(max-width:600px)");
   useEffect(() => {
     const posts = async () => {
       try {
@@ -108,10 +109,10 @@ export default function Profile() {
 
   return (
     <Grid container>
-      <Grid item>
+      <Grid item sx={{ position: "fixed" }}>
         <SideBar />
       </Grid>
-      <Grid item sx={{ display: "flex", ml: 4 }}>
+      <Grid item sx={{ display: "flex", ml: isMobile ? 0 : 30 }}>
         <UserPost
           post={posts[postIndex]}
           open={modalOpen}
@@ -121,12 +122,18 @@ export default function Profile() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            width: 800,
+            width: isMobile ? 400 : 800,
             mt: 6,
             ml: 13,
           }}
         >
-          <Box sx={{ display: "flex", mb: 5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              mb: 5,
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
@@ -219,14 +226,14 @@ export default function Profile() {
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "center",
+                justifyContent: isMobile ? "" : "center",
                 mt: 1,
               }}
             >
               <TabPanel value={value} index={0}>
                 <ImageList
-                  sx={{ width: 700, height: 400, mt: 2 }}
-                  cols={3}
+                  sx={{ width: isMobile ? 300 : 700, height: 400, mt: 2 }}
+                  cols={isMobile ? 1 : 2}
                   rowHeight={250}
                 >
                   {posts.map((post, i) => (

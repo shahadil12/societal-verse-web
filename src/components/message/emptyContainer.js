@@ -1,8 +1,11 @@
 import MapsUgcIcon from "@mui/icons-material/MapsUgc";
 import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 const EmptyContainer = () => {
+  const isMobile = useMediaQuery("(max-width:600px)");
+
   return (
     <Box
       sx={{
@@ -12,7 +15,8 @@ const EmptyContainer = () => {
         alignContent: "center",
         alignItems: "center",
         height: "550px",
-        width: "700px",
+        width: isMobile ? 275 : 700,
+        ml: isMobile ? 10 : 0,
       }}
     >
       <MapsUgcIcon
@@ -22,7 +26,9 @@ const EmptyContainer = () => {
           mb: 1,
         }}
       />
-      <Typography variant="h3">Send private messages to a friend.</Typography>
+      <Typography variant={isMobile ? "h5" : "h3"}>
+        Send private messages to a friend.
+      </Typography>
     </Box>
   );
 };

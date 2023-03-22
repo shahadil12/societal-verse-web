@@ -4,27 +4,18 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
+import CardActions from "@mui/material/CardActions";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CardMedia from "@mui/material/CardMedia";
 import Popover from "@mui/material/Popover";
 import IconButton from "@mui/material/IconButton";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Modal, Box, Divider, Avatar, Button, Typography } from "@mui/material";
 import { useState } from "react";
 import client from "../../utils/api";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 900,
-  bgcolor: "background.paper",
-  border: "1px solid #E2E2E2",
-  boxShadow:
-    "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
-};
+import dayjs from "dayjs";
 
 const UserPost = (props) => {
   const Router = useRouter();
@@ -33,7 +24,24 @@ const UserPost = (props) => {
   const [anchorEL, setAnchorEl] = useState(null);
   const popOverOpenHandler = (event) => setAnchorEl(event.currentTarget);
   const popOverCloseHandler = () => setAnchorEl(null);
+  const isMobile = useMediaQuery("(max-width:600px)");
   const open = Boolean(anchorEL);
+
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: isMobile ? 460 : 900,
+    bgcolor: "background.paper",
+    border: "1px solid #E2E2E2",
+    boxShadow:
+      "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
+  };
+
+  const postUploadDate = dayjs(props?.post?.post?.updatedAt)
+    .toString()
+    .split(" ");
 
   const postEditHandler = async (postId) => {
     Router.push(`/homepage/post/${postId}`);
@@ -134,7 +142,7 @@ const UserPost = (props) => {
                 flexDirection: "column",
               }}
             >
-              <List sx={{ height: 400, maxHeight: 400, overflow: "auto" }}>
+              <List sx={{ height: 350, maxHeight: 350, overflow: "auto" }}>
                 {props?.post?.comments.map((comment, i) => {
                   return (
                     <>
@@ -161,16 +169,26 @@ const UserPost = (props) => {
                   );
                 })}
               </List>
-              <Typography style={{ marginLeft: 18 }}>28 MINUTES AGO</Typography>
+              <Typography variant="h5" sx={{ ml: 2 }}>
+                {props?.post?.likes} likes
+              </Typography>
+              <Typography sx={{ ml: 2 }}>
+                <br />
+                {`${postUploadDate[0]} ${postUploadDate[1]} ${postUploadDate[2]} ${postUploadDate[3]}`}
+              </Typography>
             </Box>
           </Box>
-          <Box width={500} height={500} sx={{ maxHeight: 500, maxWidth: 500 }}>
+          <Box
+            width={isMobile ? 250 : 500}
+            height={500}
+            sx={{ maxHeight: 500, maxWidth: isMobile ? 250 : 500 }}
+          >
             <CardMedia
               component="img"
               image={`data:image/jpeg;base64,${props?.post?.post?.picture}`}
               sx={{
                 height: 500,
-                width: 500,
+                width: isMobile ? 250 : 500,
               }}
             />
           </Box>

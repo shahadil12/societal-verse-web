@@ -11,6 +11,7 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import BrightnessHighIcon from "@mui/icons-material/BrightnessHigh";
+import MenuIcon from "@mui/icons-material/Menu";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -21,7 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "@mui/material/styles";
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { authActions } from "../../store/authReducer";
 import client from "../../utils/api";
 
@@ -48,8 +49,17 @@ export default function SideBar() {
   const token = useSelector((state) => state.auth.token);
   const handleClose = () => setLogoutModalOpen(false);
   const modeHandler = () => dispatch(authActions.setMode());
-
-  const matches = useMediaQuery("(min-width:600px)");
+  const close = useMediaQuery("(max-width:600px)");
+  const [isInitial, setIsInitial] = useState(true);
+  // useEffect(() => {
+  //   if (isInitial) {
+  //     collapseSidebar();
+  //     collapseSidebar();
+  //     setIsInitial(false);
+  //   } else {
+  //     collapseSidebar();
+  //   }
+  // }, [close]);
 
   const logoutHandler = async () => {
     try {
@@ -152,15 +162,16 @@ export default function SideBar() {
       {modal}
       <Sidebar
         breakPoint="xm"
+        width={close ? "70px" : "250px"}
         style={{
           borderRadius: 7,
-
           boxShadow:
             "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
         }}
       >
         <Menu style={{ height: "100vh", backgroundColor: bcSidebar }}>
           <MenuItem
+            icon={close ? <MenuIcon /> : ""}
             style={{ textAlign: "left", marginBottom: 60, marginTop: 60 }}
           >
             <Typography variant="h2">Societal Verse</Typography>

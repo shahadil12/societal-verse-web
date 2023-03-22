@@ -18,6 +18,7 @@ import ImageUploading from "react-images-uploading";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Alert from "@mui/material/Alert";
 import useUser from "../../../hooks/useUser";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import useInput from "../../../hooks/useInput";
 import client from "../../../utils/api";
 import { useSelector } from "react-redux";
@@ -36,7 +37,6 @@ const style = {
     "0 2px 4px -2px rgba(0,0,0,0.24), 0 4px 24px -2px rgba(0, 0, 0, 0.2)",
   p: 2,
 };
-
 const maxNumber = 1;
 const isValidCaption = /^.{1,500}$/;
 
@@ -50,7 +50,7 @@ const CreatePost = (props) => {
   const [image, setImage] = useState([]);
   const [picture, setPicture] = useState("");
   const [postUploadedModalOpen, setPostUploadedModalOpen] = useState(false);
-
+  const isMobile = useMediaQuery("(max-width:600px)");
   const imageUploadHandler = (imageList) => {
     setImage(imageList);
     if (imageList.length > 0) {
@@ -136,7 +136,7 @@ const CreatePost = (props) => {
   return (
     <Grid container>
       {modal}
-      <Grid item>
+      <Grid item sx={{ position: "fixed" }}>
         <SideBar />
       </Grid>
       <Grid item>
@@ -164,7 +164,8 @@ const CreatePost = (props) => {
                     justifyContent: "center",
                     alignContent: "center",
                     marginTop: 16,
-                    marginLeft: 32,
+                    marginLeft: isMobile ? 12 : 64,
+                    maxWidth: isMobile ? 370 : 500,
                     borderRadius: 4,
                     border: 1,
                     borderColor: "#E2E2E2",
@@ -205,7 +206,9 @@ const CreatePost = (props) => {
                       />
                       <Button variant="contained" onClick={onImageUpload}>
                         <Typography>
-                          Click Here To Upload Picture from Your Device
+                          {isMobile
+                            ? "Click Here To Upload Picture "
+                            : "Click Here To Upload Picture from Your Device"}
                         </Typography>
                       </Button>
                     </Box>
@@ -220,7 +223,7 @@ const CreatePost = (props) => {
                       justifyContent: "center",
                       alignContent: "center",
                       marginTop: 9,
-                      marginLeft: 17,
+                      marginLeft: isMobile ? 9 : 55,
                       borderRadius: 5,
                       border: 1,
                       borderColor: "#E2E2E2",
@@ -301,13 +304,13 @@ const CreatePost = (props) => {
                       </Box>
                     </Box>
                     <Box
-                      width={500}
+                      width={isMobile ? 240 : 500}
                       height={500}
                       sx={{
-                        m: 1,
+                        m: isMobile ? 0 : 1,
                         borderLeft: 1,
                         borderColor: "#E2E2E2",
-                        pl: 3,
+                        pl: isMobile ? 0.5 : 3,
                       }}
                     >
                       <CardMedia
@@ -315,7 +318,7 @@ const CreatePost = (props) => {
                         image={imageList[0]["data_url"]}
                         sx={{
                           height: 450,
-                          width: 450,
+                          width: isMobile ? 240 : 450,
                           mb: 1,
                           mt: 3,
                           border: 1,
