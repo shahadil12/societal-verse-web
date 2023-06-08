@@ -6,7 +6,7 @@ import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import client from "../../../utils/api";
+import { client } from "../../../utils/api";
 import { useRouter } from "next/router";
 import FullPost from "../../../components/post/fullPost";
 import { Typography } from "@mui/material";

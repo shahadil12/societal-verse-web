@@ -8,7 +8,7 @@ import SideBar from "../../components/ui/SideBar";
 import { Avatar, Grid, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import client from "../../utils/api";
+import { client } from "../../utils/api";
 import EmptyContainer from "../../components/message/emptyContainer";
 import MessageContainer from "../../components/message/messageContainer";
 import useSWR from "swr";

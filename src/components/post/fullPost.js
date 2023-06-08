@@ -17,7 +17,7 @@ import SendIcon from "@mui/icons-material/Send";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useSelector } from "react-redux";
 import { Modal, Box, Divider, Avatar, Typography, Button } from "@mui/material";
-import client from "../../utils/api";
+import { client } from "../../utils/api";
 import { useRouter } from "next/router";
 import Like from "./like";
 import { useEffect, useState } from "react";

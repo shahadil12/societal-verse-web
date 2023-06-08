@@ -12,7 +12,7 @@ import Container from "@mui/material/Container";
 import { useState } from "react";
 import useInput from "../hooks/useInput";
 import { useRouter } from "next/router";
-import client from "../utils/api";
+import { client } from "../utils/api";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authReducer";
 import useUser from "../hooks/useUser";

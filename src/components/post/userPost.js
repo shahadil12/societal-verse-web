@@ -12,7 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { Modal, Box, Divider, Avatar, Button, Typography } from "@mui/material";
 import { useState } from "react";
-import client from "../../utils/api";
+import { client } from "../../utils/api";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";

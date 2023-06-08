@@ -20,13 +20,14 @@ import { Avatar, Typography, Box, Divider } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import client from "../../utils/api";
+import { client } from "../../utils/api";
 import Like from "./like";
 import dayjs from "dayjs";
+import { useGetPostQuery } from "../../utils/api";
 
 const isValidComment = /^.{0,500}$/;
 
-export default function Post(props) {
+export default function Post() {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
   if (!token) router.push("/");
@@ -38,6 +39,9 @@ export default function Post(props) {
   const [likedChanged, setLikeChanged] = useState(
     posts[postIndex]?.isUserLikedPost
   );
+
+  const { data, error, isLoading } = useGetPostQuery(token);
+  console.log(data, error, isLoading);
   const likeHandler = (likedChanged) => setLikeChanged(likedChanged);
   const commentChangedHandler = () => {
     setCommentChanged((prevState) => {

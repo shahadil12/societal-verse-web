@@ -10,7 +10,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import client from "../../../utils/api";
+import { client } from "../../../utils/api";
 import UserPost from "../../../components/post/userPost";
 import { useRouter } from "next/router";
 import { Typography } from "@mui/material";

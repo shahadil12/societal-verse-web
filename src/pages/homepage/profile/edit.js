@@ -18,7 +18,7 @@ import Calender from "../../../components/ui/Inputs/Calender";
 import Copyright from "../../../components/ui/Copyright";
 import SelectGender from "../../../components/ui/Inputs/SelectGender";
 import ImageUploading from "react-images-uploading";
-import client from "../../../utils/api";
+import { client } from "../../../utils/api";
 import useSWR from "swr";
 
 const maxNumber = 1;

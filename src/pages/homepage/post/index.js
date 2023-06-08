@@ -20,7 +20,7 @@ import Alert from "@mui/material/Alert";
 import useUser from "../../../hooks/useUser";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import useInput from "../../../hooks/useInput";
-import client from "../../../utils/api";
+import { client } from "../../../utils/api";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { useRouter } from "next/router";

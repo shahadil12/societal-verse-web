@@ -24,7 +24,7 @@ import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { useRouter } from "next/router";
 import { useEffect, useState, useRef } from "react";
 import { authActions } from "../../store/authReducer";
-import client from "../../utils/api";
+import { client } from "../../utils/api";
 
 const style = {
   position: "absolute",

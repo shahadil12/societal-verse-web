@@ -18,7 +18,7 @@ import {
 import ImageUploading from "react-images-uploading";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Alert from "@mui/material/Alert";
-import client from "../../../utils/api";
+import { client } from "../../../utils/api";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";

@@ -13,8 +13,10 @@ import {
 import storage from "redux-persist/lib/storage";
 import authReducer from "./authReducer";
 import userReducer from "./userReducer";
+import { api } from "../utils/api";
 
 const combinedState = combineReducers({
+  [api.reducerPath]: api.reducer,
   auth: authReducer,
   user: userReducer,
 });
@@ -44,7 +46,7 @@ export const makeStore = () => {
         serializableCheck: {
           ignoreActions: [FLUSH, REGISTER, REHYDRATE, PURGE, PAUSE, PERSIST],
         },
-      }),
+      }).concat(api.middleware),
   });
 
   store.__persister = persistStore(store);

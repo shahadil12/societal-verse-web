@@ -20,7 +20,7 @@ import Calender from "../components/ui/Inputs/Calender";
 import Copyright from "../components/ui/Copyright";
 import SelectGender from "../components/ui/Inputs/SelectGender";
 import ImageUploader from "../components/ui/Inputs/ImageUploader";
-import client from "../utils/api";
+import { client } from "../utils/api";
 
 const isValidName = /^[a-zA-Z]{1,20}$/;
 const isValidUserName = /^[a-zA-Z0-9]{1,20}$/;

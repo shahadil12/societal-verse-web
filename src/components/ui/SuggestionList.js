@@ -4,9 +4,10 @@ import ListItem from "@mui/material/ListItem";
 import Divider from "@mui/material/Divider";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
-import { Avatar, Button, ListSubheader } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import { Avatar, Button, ListSubheader, Box } from "@mui/material";
 import { useState, useEffect } from "react";
-import client from "../../utils/api";
+import { client } from "../../utils/api";
 import { useSelector } from "react-redux";
 import { Typography } from "@mui/material";
 import { useRouter } from "next/router";
@@ -19,6 +20,12 @@ const SuggestionList = () => {
   const profileShowHandler = (event) => {
     event.preventDefault();
     router.push(`/homepage/profile`);
+  };
+
+  const profileShowHandler2 = (event) => {
+    event.preventDefault();
+    const userId = event.target.userId.value;
+    router.push(`/homepage/profile/${userId}`);
   };
 
   useEffect(() => {
@@ -79,10 +86,20 @@ const SuggestionList = () => {
           <>
             <ListItem alignItems="flex-start">
               <ListItemAvatar>
-                <Avatar
-                  src={`data:image/jpeg;base64,${profile.thumbnail_profile_picture}`}
-                  sx={{ height: 40, width: 40 }}
-                />
+                <Box component="form" noValidate onSubmit={profileShowHandler2}>
+                  <IconButton type="submit">
+                    <Avatar
+                      src={`data:image/jpeg;base64,${profile.thumbnail_profile_picture}`}
+                      sx={{
+                        border: 1,
+                        borderColor: "#E0E0E0",
+                        height: 45,
+                        width: 45,
+                      }}
+                    />
+                  </IconButton>
+                  <input name="userId" value={profile.user_id} type="hidden" />
+                </Box>
               </ListItemAvatar>
               <ListItemText
                 primary={
@@ -90,7 +107,7 @@ const SuggestionList = () => {
                     {profile.user_name}
                   </Typography>
                 }
-                sx={{ mt: 2 }}
+                sx={{ mt: 3.5 }}
               />
             </ListItem>
           </>
