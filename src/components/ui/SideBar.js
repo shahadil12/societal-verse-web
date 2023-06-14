@@ -22,9 +22,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "@mui/material/styles";
 import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
 import { useRouter } from "next/router";
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import { authActions } from "../../store/authReducer";
 import { client } from "../../utils/api";
+import { useLazyLogoutQuery } from "../../utils/authApi";
 
 const style = {
   position: "absolute",
@@ -44,33 +45,17 @@ export default function SideBar() {
   const dispatch = useDispatch();
   const defaultMode = useSelector((state) => state.auth.mode);
   const theme = useTheme();
-  const { collapseSidebar } = useProSidebar();
   const [logOutModalOpen, setLogoutModalOpen] = useState(false);
   const token = useSelector((state) => state.auth.token);
   const handleClose = () => setLogoutModalOpen(false);
   const modeHandler = () => dispatch(authActions.setMode());
   const close = useMediaQuery("(max-width:600px)");
-  const [isInitial, setIsInitial] = useState(true);
-  // useEffect(() => {
-  //   if (isInitial) {
-  //     collapseSidebar();
-  //     collapseSidebar();
-  //     setIsInitial(false);
-  //   } else {
-  //     collapseSidebar();
-  //   }
-  // }, [close]);
+  const [logout] = useLazyLogoutQuery();
 
   const logoutHandler = async () => {
     try {
-      const logout = await client.post(
-        "/auth/logout",
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (logout.data.success) {
+      const { data: logoutResponse } = await logout(token);
+      if (logoutResponse.success) {
         localStorage.setItem(
           "persist:user",
           JSON.stringify({
@@ -86,7 +71,6 @@ export default function SideBar() {
             },
           })
         );
-
         Router.push("/");
       }
     } catch (error) {

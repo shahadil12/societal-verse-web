@@ -16,6 +16,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { userActions } from "../../store/userReducer";
+import { useGetFollwingProfileQuery } from "../../utils/userApi";
 
 export default function Inbox() {
   const router = useRouter();
@@ -42,7 +43,9 @@ export default function Inbox() {
       return [...prevState, message];
     });
   };
-  console.log(storeReceiverSocketId);
+
+  // const { data: followingProfileResponse = [] } =
+  //   useGetFollwingProfileQuery(token);
 
   useEffect(() => {
     const getMessages = async () => {

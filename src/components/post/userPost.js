@@ -4,7 +4,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
-import CardActions from "@mui/material/CardActions";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CardMedia from "@mui/material/CardMedia";
 import Popover from "@mui/material/Popover";
@@ -41,7 +40,9 @@ const UserPost = (props) => {
 
   const postUploadDate = dayjs(props?.post?.post?.updatedAt)
     .toString()
-    .split(" ");
+    .split(" ")
+    .slice(0, 4)
+    .join(" ");
 
   const postEditHandler = async (postId) => {
     Router.push(`/homepage/post/${postId}`);
@@ -174,7 +175,7 @@ const UserPost = (props) => {
               </Typography>
               <Typography sx={{ ml: 2 }}>
                 <br />
-                {`${postUploadDate[0]} ${postUploadDate[1]} ${postUploadDate[2]} ${postUploadDate[3]}`}
+                {`${postUploadDate}`}
               </Typography>
             </Box>
           </Box>

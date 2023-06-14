@@ -1,21 +1,25 @@
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Container from "@mui/material/Container";
+import {
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Box,
+  Grid,
+  Container,
+  Typography,
+  Avatar,
+  Alert,
+} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
-import { client } from "../utils/api";
 import { useState } from "react";
+import { useLazyGetLoginQuery } from "../utils/authApi";
+import { useLazyGetProfileQuery } from "../utils/userApi";
 import useInput from "../hooks/useInput";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { authActions } from "../store/authReducer";
 import { userActions } from "../store/userReducer";
 import Copyright from "../components/ui/Copyright";
-import { Avatar, Alert } from "@mui/material";
 
 const isValidEmail =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -47,7 +51,8 @@ export default function loginPage() {
     valueBlurHandler: passwordBlurHandler,
     reset: enteredPasswordReset,
   } = useInput((value) => value.match(isValidPassword));
-
+  const [getProfile] = useLazyGetProfileQuery();
+  const [getLogin] = useLazyGetLoginQuery();
   let formIsValid = false;
 
   if (enteredEmailIsValid && enteredPasswordIsValid) formIsValid = true;
@@ -55,38 +60,25 @@ export default function loginPage() {
   const formSubmissionHandler = async (event) => {
     try {
       event.preventDefault();
-
       if (!formIsValid) return;
 
-      const loginResponse = await client.post(
-        "/auth/login",
-        {
-          email: enteredEmail,
-          password: enteredPassword,
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
+      const { data: loginResponse } = await getLogin({
+        email: enteredEmail,
+        password: enteredPassword,
+      });
 
-      if (loginResponse.data.error) {
+      if (loginResponse.error) {
         setHasServerError(true);
         setServerErrorMessage(loginResponse.data.error);
         return;
       }
-      if (loginResponse.data.success) {
-        dispatch(authActions.setToken(loginResponse.data.token));
-        const profileResponse = await client.get("/profile", {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${loginResponse.data.token}`,
-          },
-        });
-        if (profileResponse.data.success) {
+      if (loginResponse.success) {
+        dispatch(authActions.setToken(loginResponse.token));
+        const { data: profileResponse } = await getProfile(loginResponse.token);
+
+        if (profileResponse.success) {
           setHasProfile(true);
-          dispatch(userActions.setProfile(profileResponse.data));
+          dispatch(userActions.setProfile(profileResponse));
           Router.push("/homepage");
           return;
         }

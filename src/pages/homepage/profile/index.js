@@ -15,6 +15,8 @@ import UserPost from "../../../components/post/userPost";
 import { useRouter } from "next/router";
 import { Typography } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useGetSpecificProfileQuery } from "../../../utils/userApi";
+import { useGetSpecificProfilePostQuery } from "../../../utils/postApi";
 
 const style = {
   position: "absolute",
@@ -68,6 +70,12 @@ export default function Profile() {
   const [postIndex, setPostIndex] = useState(0);
   const [profile, setProfile] = useState({});
   const isMobile = useMediaQuery("(max-width:600px)");
+  // const { data: profile = {} } = useGetSpecificProfileQuery({ token, userId });
+  // const { data: postsData = [], isLoading } = useGetSpecificProfilePostQuery({
+  //   token,
+  //   userId,
+  // });
+
   useEffect(() => {
     const posts = async () => {
       try {
@@ -236,7 +244,7 @@ export default function Profile() {
                   cols={isMobile ? 1 : 2}
                   rowHeight={250}
                 >
-                  {posts.map((post, i) => (
+                  {posts?.map((post, i) => (
                     <ImageListItem key={i}>
                       <img
                         onClick={() => {

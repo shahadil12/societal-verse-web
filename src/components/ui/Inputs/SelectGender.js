@@ -12,7 +12,7 @@ const SelectGender = (props) => {
   return (
     <FormControl>
       <FormLabel>Gender *</FormLabel>
-      <RadioGroup row onChange={genderChangeHandler} defaultValue={props.value}>
+      <RadioGroup row onChange={genderChangeHandler}>
         <FormControlLabel value="FEMALE" control={<Radio />} label="Female" />
         <FormControlLabel value="MALE" control={<Radio />} label="Male" />
         <FormControlLabel value="OTHER" control={<Radio />} label="Other" />

@@ -1,35 +1,34 @@
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Grid,
+  Box,
+  Typography,
+  Container,
+  Alert,
+} from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import useInput from "../hooks/useInput";
-import Alert from "@mui/material/Alert";
-import { useRouter } from "next/router";
 import dayjs from "dayjs";
-import { userActions } from "../store/userReducer";
-import useUser from "../hooks/useUser";
 import Calender from "../components/ui/Inputs/Calender";
 import Copyright from "../components/ui/Copyright";
 import SelectGender from "../components/ui/Inputs/SelectGender";
 import ImageUploader from "../components/ui/Inputs/ImageUploader";
-import { client } from "../utils/api";
+import {
+  useCreateProfileMutation,
+  useLazyGetProfileQuery,
+} from "../utils/userApi";
 
 const isValidName = /^[a-zA-Z]{1,20}$/;
 const isValidUserName = /^[a-zA-Z0-9]{1,20}$/;
 const isValidBio = /^.{0,500}$/;
 
 export default function profileSetupPage() {
-  const Router = useRouter();
-  const profile = useSelector((state) => state.user.profile);
-  const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
   const [enteredGender, setEnteredGender] = useState("");
   const [genderIsValid, setGenderIsValid] = useState(false);
@@ -39,6 +38,8 @@ export default function profileSetupPage() {
   const [enteredProfilePicture, setEnteredProfilePicture] = useState("");
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");
+  const [createProfile] = useCreateProfileMutation();
+  const [getProfile] = useLazyGetProfileQuery();
 
   const genderValue = (gender) => setEnteredGender(gender);
   const genderValid = (genderIsValid) => setGenderIsValid(genderIsValid);
@@ -95,47 +96,30 @@ export default function profileSetupPage() {
   const formSubbmissionHandler = async (event) => {
     try {
       event.preventDefault();
-
       if (!formIsValid) return;
 
-      const profileCreationResponse = await client.post(
-        "/profile",
-        {
-          first_name: enteredFirstName,
-          last_name: enteredLastName,
-          user_name: enteredUserName,
-          bio: enteredBio,
-          gender: enteredGender,
-          profile_picture: enteredProfilePicture,
-          dob: enteredDate.toISOString(),
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-          maxBodyLength: 6000000,
-          maxContentLength: 6000000,
-        }
-      );
+      const { data: profileCreateResponse } = await createProfile({
+        token: token,
+        firstName: enteredFirstName,
+        lastName: enteredLastName,
+        userName: enteredUserName,
+        bio: enteredBio,
+        gender: enteredGender,
+        profilePicture: enteredProfilePicture,
+        dob: enteredDate.toISOString(),
+      });
 
-      if (profileCreationResponse.data.success) {
-        const profileResponse = await client.get("/profile", {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (profileResponse.data.success) {
-          dispatch(userActions.setProfile(profileResponse.data));
+      if (profileCreateResponse.success) {
+        const { data: profileResponse } = await getProfile(token);
+        if (profileResponse.success) {
           Router.push("/homepage");
           return;
         }
       }
 
-      if (!profileCreationResponse.data.success) {
+      if (!profileCreateResponse.success) {
         setHasServerError(true);
-        setServerErrorMessage(profileCreationResponse.data.error);
+        setServerErrorMessage(profileCreateResponse.error);
       }
 
       firstNameReset();
@@ -147,6 +131,7 @@ export default function profileSetupPage() {
       setEnteredGender("");
     } catch (error) {
       setHasServerError(true);
+      console.log(error);
       if (error?.response?.data?.error) {
         setServerErrorMessage(error.response.data.error);
       }

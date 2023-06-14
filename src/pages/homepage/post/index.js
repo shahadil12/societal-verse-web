@@ -17,13 +17,13 @@ import {
 import ImageUploading from "react-images-uploading";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Alert from "@mui/material/Alert";
-import useUser from "../../../hooks/useUser";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import useInput from "../../../hooks/useInput";
 import { client } from "../../../utils/api";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { useCreatePostMutation } from "../../../utils/postApi";
 
 const style = {
   position: "absolute",
@@ -40,10 +40,11 @@ const style = {
 const maxNumber = 1;
 const isValidCaption = /^.{1,500}$/;
 
-const CreatePost = (props) => {
+const CreatePost = () => {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
   if (!token) router.push("/");
+
   const profile = useSelector((state) => state.user.profile);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");
@@ -51,6 +52,8 @@ const CreatePost = (props) => {
   const [picture, setPicture] = useState("");
   const [postUploadedModalOpen, setPostUploadedModalOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width:600px)");
+  const [createPost] = useCreatePostMutation();
+
   const imageUploadHandler = (imageList) => {
     setImage(imageList);
     if (imageList.length > 0) {
@@ -76,25 +79,17 @@ const CreatePost = (props) => {
     try {
       event.preventDefault();
 
-      const response = await client.post(
-        "/post",
-        {
-          caption: enteredCaption,
-          picture: picture,
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const { data: postCreationResponse } = await createPost({
+        token,
+        caption: enteredCaption,
+        picture,
+      });
 
-      if (response.data.error) {
+      if (postCreationResponse.error) {
         setHasServerError(true);
         setServerErrorMessage(response.data.error);
       }
-      if (response.data.success) {
+      if (postCreationResponse.success) {
         setPostUploadedModalOpen(true);
         router.push("/homepage/profile");
       }

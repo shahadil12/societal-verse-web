@@ -4,7 +4,6 @@ import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import IconButton from "@mui/material/IconButton";
 import FilledInput from "@mui/material/FilledInput";
@@ -16,14 +15,18 @@ import FullPost from "./fullPost";
 import useInput from "../../hooks/useInput";
 import SendIcon from "@mui/icons-material/Send";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { Avatar, Typography, Box, Divider } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Avatar, Typography, Box } from "@mui/material";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { client } from "../../utils/api";
 import Like from "./like";
 import dayjs from "dayjs";
-import { useGetPostQuery } from "../../utils/api";
+import PostSkeleton from "./postSkeleton";
+import { useGetPostQuery } from "../../utils/postApi";
+import {
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
+} from "../../utils/commentApi";
 
 const isValidComment = /^.{0,500}$/;
 
@@ -31,24 +34,22 @@ export default function Post() {
   const router = useRouter();
   const token = useSelector((state) => state.auth.token);
   if (!token) router.push("/");
-  const isMobile = useMediaQuery("(max-width:600px)");
-  const [posts, setPosts] = useState([]);
+
   const [postIndex, setPostIndex] = useState(0);
   const [logOutModalOpen, setLogoutModalOpen] = useState(false);
+  const [createComment] = useCreateCommentMutation();
+  const [deleteComment] = useDeleteCommentMutation();
+  const {
+    data: postData,
+    isLoading,
+    refetch: postRefetch,
+  } = useGetPostQuery(token);
+  const isMobile = useMediaQuery("(max-width:600px)");
   const handleClose = () => setLogoutModalOpen(false);
-  const [likedChanged, setLikeChanged] = useState(
-    posts[postIndex]?.isUserLikedPost
-  );
 
-  const { data, error, isLoading } = useGetPostQuery(token);
-  console.log(data, error, isLoading);
-  const likeHandler = (likedChanged) => setLikeChanged(likedChanged);
-  const commentChangedHandler = () => {
-    setCommentChanged((prevState) => {
-      return !prevState;
-    });
-  };
-  const [commentChanged, setCommentChanged] = useState(false);
+  const likeHandler = () => postRefetch();
+  const commentChangedHandler = () => postRefetch();
+
   const {
     value: enteredComment,
     valueIsValid: enteredCommentIsValid,
@@ -57,44 +58,20 @@ export default function Post() {
     valueBlurHandler: commentBlurHandler,
     reset: enteredCommentReset,
   } = useInput((value) => value.match(isValidComment));
+
   let formIsValid = false;
-  if (enteredCommentIsValid) {
-    formIsValid = true;
-  }
-  useEffect(() => {
-    const getPost = async () => {
-      try {
-        const posts = await client.get("/post", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPosts(posts.data.posts);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getPost();
-  }, [likedChanged, commentChanged]);
+  if (enteredCommentIsValid) formIsValid = true;
 
   const commentSubmitHandler = async (event) => {
     try {
       event.preventDefault();
-      const postId = event.target.postId.value;
-      const createComment = await client.post(
-        `/post/comment/${postId}`,
-        {
-          comment: enteredComment,
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (createComment.data.success) {
-        setCommentChanged((prevState) => {
-          return !prevState;
-        });
+      const commentResponse = await createComment({
+        token: token,
+        postId: event.target.postId.value,
+        comment: enteredComment,
+      });
+      if (commentResponse.data.success) {
+        postRefetch();
         enteredCommentReset();
       }
     } catch (error) {
@@ -104,14 +81,11 @@ export default function Post() {
 
   const commentDeleteHandler = async (commentId) => {
     try {
-      const response = await client.delete(`/post/comment/${commentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const { data: deleteCommentResponse } = await deleteComment({
+        token,
+        commentId,
       });
-      if (response.data.success) {
-        setCommentChanged((prevState) => {
-          return setCommentChanged(!prevState);
-        });
-      }
+      if (deleteCommentResponse.success) postRefetch();
     } catch (error) {
       console.log(error);
     }
@@ -123,20 +97,23 @@ export default function Post() {
     router.push(`/homepage/profile/${userId}`);
   };
 
-  const postUploadDate = dayjs(posts[postIndex]?.post?.updatedAt)
+  const postUploadDate = dayjs(postData?.posts[postIndex]?.post?.updatedAt)
     .toString()
-    .split(" ");
+    .split(" ")
+    .slice(0, 4)
+    .join(" ");
 
+  if (isLoading) return <PostSkeleton />;
   return (
     <>
       <FullPost
-        post={posts[postIndex]}
+        post={postData.posts[postIndex]}
         open={logOutModalOpen}
         commentDeleteHandler={commentDeleteHandler}
-        commentChanged={commentChangedHandler}
+        postRefetch={postRefetch}
         close={handleClose}
       />
-      {posts.map((post, i) => {
+      {postData.posts.map((post, i) => {
         return (
           <>
             <Card
@@ -222,7 +199,7 @@ export default function Post() {
                 </Typography>
                 <Typography>
                   <br />
-                  {`${postUploadDate[0]} ${postUploadDate[1]} ${postUploadDate[2]} ${postUploadDate[3]}`}
+                  {`${postUploadDate} `}
                 </Typography>
                 <Box
                   component="form"

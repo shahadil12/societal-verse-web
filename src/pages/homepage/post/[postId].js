@@ -22,6 +22,10 @@ import { client } from "../../../utils/api";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import {
+  useLazyGetUserPostQuery,
+  useUpdatePostMutation,
+} from "../../../utils/postApi";
 
 const style = {
   position: "absolute",
@@ -51,6 +55,8 @@ const EditPost = () => {
   const [postUploadedModalOpen, setPostUploadedModalOpen] = useState(false);
   const [caption, setCaption] = useState("");
   const isMobile = useMediaQuery("(max-width:600px)");
+  const [getUserPost] = useLazyGetUserPostQuery();
+  const [updatePost] = useUpdatePostMutation();
   const captionChangeHandler = (event) => {
     setCaption(event.target.value);
   };
@@ -58,18 +64,15 @@ const EditPost = () => {
   useEffect(() => {
     const post = async () => {
       try {
-        const response = await client.get(`/post/${postId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data.success) {
-          // const buffer = Buffer.from(response.data.post.picture, "base64");
-          // const { mime } = await fileTypeFromBuffer(buffer);
+        const { data: userPostResponse } = await getUserPost({ token, postId });
+        if (userPostResponse.success) {
           setImage([
             {
-              data_url: `data:/image/jpeg;base64,${response.data.post.picture}`,
+              data_url: `data:/image/jpeg;base64,${userPostResponse.post.picture}`,
             },
           ]);
-          setCaption(response.data.post.caption);
+          setPicture(userPostResponse.post.picture);
+          setCaption(userPostResponse.post.caption);
         }
       } catch (error) {
         console.log(error);
@@ -88,7 +91,11 @@ const EditPost = () => {
   const formSubmitHandler = async (event) => {
     try {
       event.preventDefault();
-
+      // const { data: response } = await updatePost({
+      //   token,
+      //   caption,
+      //   picture,
+      // });
       const response = await client.put(
         `post/${postId}`,
         {
@@ -115,7 +122,8 @@ const EditPost = () => {
       setCaption("");
     } catch (error) {
       setHasServerError(true);
-      if (!error.response) {
+      console.log(error);
+      if (!error?.response) {
         setServerErrorMessage("Can't connect to server");
       }
       if (error?.response?.data?.error) {

@@ -13,13 +13,11 @@ import useInput from "../../../hooks/useInput";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
-import { userActions } from "../../../store/userReducer";
 import Calender from "../../../components/ui/Inputs/Calender";
 import Copyright from "../../../components/ui/Copyright";
 import SelectGender from "../../../components/ui/Inputs/SelectGender";
 import ImageUploading from "react-images-uploading";
-import { client } from "../../../utils/api";
-import useSWR from "swr";
+import { useUpdateProfileMutation } from "../../../utils/userApi";
 
 const maxNumber = 1;
 
@@ -32,13 +30,13 @@ export default function profileSetupPage() {
   const token = useSelector((state) => state.auth.token);
   if (!token) Router.push("/");
   const profile = useSelector((state) => state.user.profile);
-  const dispatch = useDispatch();
   const [enteredGender, setEnteredGender] = useState("");
   const [enteredProfilePicture, setEnteredProfilePicture] = useState("");
   const [image, setImage] = useState([]);
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState("");
   const [enteredDate, setDateValue] = useState(dayjs());
+  const [updateProfile] = useUpdateProfileMutation();
   const genderValue = (gender) => setEnteredGender(gender);
   const dateValue = (date) => setDateValue(date);
   const imageUploadHandler = (imageList) => {
@@ -92,39 +90,24 @@ export default function profileSetupPage() {
     setEnteredUserName(profile.user_name);
     setEnteredBio(profile.bio);
   }, []);
-
   const formSubbmissionHandler = async (event) => {
     try {
       event.preventDefault();
-
-      const profileUpdationResponse = await client.put(
-        "/profile",
-        {
-          first_name: enteredFirstName,
-          last_name: enteredLastName,
-          user_name: enteredUserName,
-          bio: enteredBio,
-          gender: enteredGender,
-          profile_picture: enteredProfilePicture,
-          dob: enteredDate.toISOString(),
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-          maxBodyLength: 6000000,
-          maxContentLength: 6000000,
-        }
-      );
-
-      console.log(profileUpdationResponse);
-      if (profileUpdationResponse.data.error) {
+      const { data: updateProfileResponse } = await updateProfile({
+        token: token,
+        firstName: enteredFirstName,
+        lastName: enteredLastName,
+        userName: enteredUserName,
+        bio: enteredBio,
+        gender: enteredGender,
+        profilePicture: enteredProfilePicture,
+        dob: enteredDate.toISOString(),
+      });
+      if (updateProfileResponse.error) {
         setHasServerError(true);
-        setServerErrorMessage(profileUpdationResponse.data.error);
+        setServerErrorMessage(updateProfileResponse.error);
       }
-
-      if (profileUpdationResponse.data.success) {
+      if (updateProfileResponse.success) {
         Router.push("/homepage/profile");
       }
     } catch (error) {

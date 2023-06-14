@@ -1,23 +1,23 @@
-import * as React from "react";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Alert from "@mui/material/Alert";
+import {
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Grid,
+  Box,
+  Alert,
+  Typography,
+  Container,
+} from "@mui/material";
 import LoginIcon from "@mui/icons-material/Login";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import { useState } from "react";
+import Copyright from "../components/ui/Copyright";
 import useInput from "../hooks/useInput";
+import { useState } from "react";
 import { useRouter } from "next/router";
-import { client } from "../utils/api";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authReducer";
-import useUser from "../hooks/useUser";
-import Copyright from "../components/ui/Copyright";
 import { Avatar } from "@mui/material";
+import { useRegisterMutation } from "../utils/authApi";
 
 const isValidName = /^[a-zA-Z ]{1,20}$/;
 
@@ -31,6 +31,7 @@ export default function SignUpPage() {
   const dispatch = useDispatch();
   const [hasServerError, setHasServerError] = useState(false);
   const [serverErrorMessage, setServerErrorMessage] = useState(false);
+  const [register] = useRegisterMutation();
 
   const {
     value: enteredName,
@@ -70,26 +71,19 @@ export default function SignUpPage() {
       event.preventDefault();
 
       if (!formIsValid) return;
+      const { data: registerResponse } = await register({
+        name: enteredName,
+        email: enteredEmail,
+        password: enteredPassword,
+      });
 
-      const response = await client.post(
-        "/auth/register",
-        {
-          full_name: enteredName,
-          email: enteredEmail,
-          password: enteredPassword,
-        },
-        {
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        }
-      );
-
-      if (response.data.error) {
+      if (registerResponse.error) {
         setHasServerError(true);
-        setServerErrorMessage(response.data.error);
+        setServerErrorMessage(registerResponse.error);
         return;
       }
-      if (response.data.success) {
-        dispatch(authActions.setToken(response.data.token));
+      if (registerResponse.success) {
+        dispatch(authActions.setToken(registerResponse.token));
         Router.push("/profile");
       }
 

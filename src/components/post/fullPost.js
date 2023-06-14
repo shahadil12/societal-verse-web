@@ -5,8 +5,6 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import CardMedia from "@mui/material/CardMedia";
-import CardActions from "@mui/material/CardActions";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import IconButton from "@mui/material/IconButton";
 import FilledInput from "@mui/material/FilledInput";
 import InputLabel from "@mui/material/InputLabel";
@@ -17,17 +15,15 @@ import SendIcon from "@mui/icons-material/Send";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useSelector } from "react-redux";
 import { Modal, Box, Divider, Avatar, Typography, Button } from "@mui/material";
-import { client } from "../../utils/api";
-import { useRouter } from "next/router";
-import Like from "./like";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import dayjs from "dayjs";
-import { borderColor } from "@mui/system";
-
+import { useCreateCommentMutation } from "../../utils/commentApi";
 const FullPost = (props) => {
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.user.profile);
+
   const [comment, setComment] = useState("");
+  const [createComment] = useCreateCommentMutation();
   const isMobile = useMediaQuery("(max-width:600px)");
   const commentValueHandler = (event) => {
     setComment(event.target.value);
@@ -35,7 +31,10 @@ const FullPost = (props) => {
 
   const postUploadDate = dayjs(props?.post?.post?.updatedAt)
     .toString()
-    .split(" ");
+    .split(" ")
+    .slice(0, 4)
+    .join(" ");
+
   const style = {
     position: "absolute",
     top: "50%",
@@ -51,23 +50,14 @@ const FullPost = (props) => {
   const commentSubmitHandler = async (event) => {
     try {
       event.preventDefault();
-      const postId = event.target.postId.value;
-      const createComment = await client.post(
-        `/post/comment/${postId}`,
-        {
-          comment: comment,
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(createComment);
-      if (createComment.data.success) {
+      const commentResponse = await createComment({
+        token: token,
+        postId: event.target.postId.value,
+        comment: comment,
+      });
+      if (commentResponse.data.success) {
+        props.postRefetch();
         setComment("");
-        props.commentChanged();
       }
     } catch (error) {
       console.log(error);
@@ -166,7 +156,7 @@ const FullPost = (props) => {
 
               <Typography sx={{ ml: 1 }}>
                 <br />
-                {`${postUploadDate[0]} ${postUploadDate[1]} ${postUploadDate[2]} ${postUploadDate[3]}`}
+                {`${postUploadDate}`}
               </Typography>
               <Box component="form" noValidate onSubmit={commentSubmitHandler}>
                 <FormControl fullWidth variant="filled">

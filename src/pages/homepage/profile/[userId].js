@@ -13,6 +13,12 @@ import { Typography } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import {
+  useLazyGetSpecificProfileQuery,
+  useFollowMutation,
+  useUnfollowMutation,
+} from "../../../utils/userApi";
+import { useLazyGetSpecificProfilePostQuery } from "../../../utils/postApi";
 
 const style = {
   position: "absolute",
@@ -50,6 +56,10 @@ export default function Profile() {
   const [profile, setProfile] = useState({});
   const [isFollowing, setIsFollowing] = useState(false);
   const isMobile = useMediaQuery("(max-width:600px)");
+  const [getSpecificProfile] = useLazyGetSpecificProfileQuery();
+  const [getSpecificProfilePost] = useLazyGetSpecificProfilePostQuery();
+  const [follow] = useFollowMutation();
+  const [unfollow] = useUnfollowMutation();
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -57,46 +67,30 @@ export default function Profile() {
   }, [router.isReady]);
 
   useEffect(() => {
-    const getProfile = async () => {
+    const initailData = async () => {
       if (!userId) return;
       try {
-        const response = await client.get(`/profile/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data: profileResponse } = await getSpecificProfile({
+          token,
+          userId,
         });
-        if (response?.data?.success) {
-          setProfile(response?.data);
-          setIsFollowing(response?.data?.isUserFollowing);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getProfile();
+        const { data: profilePostResponse } = await getSpecificProfilePost({
+          token,
+          userId,
+        });
 
-    const posts = async () => {
-      if (!userId) return;
-      try {
-        const response = await client.post(
-          `/profile/showSpecificProfilePosts`,
-          {
-            userId: userId,
-          },
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log(response);
-        if (response.data.success) {
-          setPosts(response.data.posts);
+        if (profileResponse.success) {
+          setProfile(profileResponse);
+          setIsFollowing(profileResponse.isUserFollowing);
+        }
+        if (profilePostResponse.success) {
+          setPosts(profilePostResponse.posts);
         }
       } catch (error) {
         console.log(error);
       }
     };
-    posts();
+    initailData();
   }, [userId, isFollowing]);
 
   const handleChange = (event, newValue) => {
@@ -109,30 +103,13 @@ export default function Profile() {
     try {
       if (!isFollowing) {
         if (!userId) return;
-        const response = await client.post(
-          `/user/follow/${userId}`,
-          {},
-          {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.data.success) {
-          setIsFollowing(true);
-        }
+        const { data: followResponse } = await follow({ token, userId });
+        if (followResponse.success) setIsFollowing(true);
       }
 
       if (isFollowing) {
-        const response = await client.delete("/user/follow", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (response.data.success) {
-          setIsFollowing(false);
-        }
+        const { data: unfollowResponse } = await unfollow(token);
+        if (unfollowResponse.success) setIsFollowing(false);
       }
     } catch (error) {
       console.log(error);
